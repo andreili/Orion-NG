@@ -9,6 +9,8 @@
 _autosave-*
 *.tmp
 
+rescue-backup
+
 # Netlist files (exported from Eeschema)
 *.net
 
@@ -19,3 +21,14 @@ _autosave-*
 # Exported BOM files
 *.xml
 *.csv
+
+# WinCUPL files
+*.abs
+*.doc
+*.pdf
+*.sim
+*.pla
+
+# Proteus files
+*.pdsbak
+*.workspace

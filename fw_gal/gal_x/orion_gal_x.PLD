@@ -1,0 +1,45 @@
+Name     orion_gal_x ;
+PartNo   00 ;
+Date     05.05.2018 ;
+Revision 01 ;
+Designer andreil ;
+Company   ;
+Assembly ;
+Location  ;
+Device   g22v10;
+
+PIN  [1..10] = [x0..9];
+PIN  11  = sr16; 
+PIN  13  = wen;
+
+PIN  23  = xresn;
+PIN  22  = ben;
+PIN  21  = bh;
+PIN  20  = xle;
+PIN  19  = hs3;
+PIN  18  = hs5;
+PIN  17  = hs;
+PIN  16  = col0;
+PIN  15  = col1;
+PIN  14  = be;
+
+xresn    = !(x9 & x8 & x4 & x3 & x2 & x1 & x0);
+be = x2 & x1 & x0;
+ben = !(x2 & x1 & x0);
+bh = (!sr16 & (!x9 & ((!x8 & x7)
+					# (!x7 & (x6 # x5 # x4 # x3))
+					# (x8 & !x6 & !x5 & !x4 & !x3)
+					 )
+			  )
+	 )
+	# (sr16 & ((!x9 & (x8 # x7 # x6 # x5 # x4 # x3))
+			 # (x9 & !x3 & !(x8 # x7 # x6 # x5 # x4))
+			  )
+	  );
+xle = ((!sr16 & !x6) # (sr16 & x6)) & (x9 & !x8 & x7 & x5 & !x4 & !x3 & x2 & x1 & x0);
+hs3 = !x7 & ((x6 & !x5) # (x5 & (!x3 # !x4)) # (!x6 & x4 & x3));
+hs5 = (!x7 & x6 & ((x4 & x3) # x5)) # (x7 & !x6 & (!x5 # !x4 # !x3));
+hs = !(wen $ (x9 & !x8 & ((!sr16 & hs3) # (sr16 & hs5))));
+
+col0 = !(x2 & !x1);
+col1 =  (x2 # x1);

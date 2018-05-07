@@ -1,0 +1,24 @@
+Name     orion_gal_y ;
+PartNo   00 ;
+Date     05.05.2018 ;
+Revision 01 ;
+Designer andreil ;
+Company   ;
+Assembly ;
+Location  ;
+Device   g22v10;
+
+PIN  [1..10] = [y0..9];
+PIN  11  = wen; 
+PIN  13  = bh;
+
+PIN  23  = yresn;
+PIN  22  = bl;
+PIN  21  = vs;
+
+yresn = !((!wen & y9 & y3 & y2) # 
+		  ( wen & y8 & y7 & y6));
+bl = bh & !y8 & !y9;
+vs = !((!y9 & y8 & !y7 & y6 & y4)
+	& ((!wen & (y5 &  y3 & !y2 &  y1))
+	 # (wen & (!y5 & !y3 &  y2 & (y1 $ y0)))));
