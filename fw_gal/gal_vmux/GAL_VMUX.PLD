@@ -8,26 +8,43 @@ Assembly None ;
 Location  ;
 Device   g22v10;
 
-PIN  [1..5] = [vm0..4];
-PIN  6  = BL_n;
-PIN  7  = p1;
-PIN  8  = p2;
-PIN  9  = p3;
-PIN  10 = p4;
-PIN  [11,13..19]  = [ps0..7];
-PIN  20 = R;
-PIN  21 = G;
+PIN  1  = vm0;
+PIN  2  = vm1;
+PIN  3  = vm4;
+PIN  4  = BL_n;
+PIN  5  = p1;
+PIN  6  = p2;
+PIN  7  = p3;
+PIN  8  = p4;
+PIN  [9..11,13..17]  = [ps0..7];
+PIN  18 = R;
+PIN  19 = IR;
+PIN  20 = G;
+PIN  21 = IG;
 PIN  22 = B;
-PIN  23 = I;
+PIN  23 = IB;
 
-I = BL_n & (((!vm4 & vm1) & ((p1 & ps3) # (!p1 & ps7)))/* pseudocolors mode */
-	# (vm4 & p2));	
-R = BL_n & (((!vm4 & !vm1) & ((p2 & p1) # (!p2 & (p1 & vm0))))/* standart mode */
-	# ((!vm4 & vm1) & ((p1 & ps2) # (!p1 & ps6)))	/* pseudocolors mode */
+R = BL_n & (
+	  ((!vm4 & !vm1) & ((p2 & p1) # (!p2 & (p1 & vm0))))		/* standart mode */
+	# ((!vm4 & vm1) & ((p1 & ps2) # (!p1 & ps6)))				/* pseudocolors mode */
 	# (vm4 & p3));	
-G = BL_n & (((!vm4 & !vm1) & (!p2 & (p1 & !vm0)))		/* standart mode */
-	# ((!vm4 & vm1) & ((p1 & ps1) # (!p1 & ps5)))	/* pseudocolors mode */
+G = BL_n & (
+	  ((!vm4 & !vm1) & (!p2 & (p1 & !vm0)))						/* standart mode */
+	# ((!vm4 & vm1) & ((p1 & ps1) # (!p1 & ps5)))				/* pseudocolors mode */
 	# (vm4 & p1));
-B = BL_n & (((!vm4 & !vm1) & ((p2 & !p1) # (!p2 & (p1 & vm0))))/* standart mode */
-	# ((!vm4 & vm1) & ((p1 & ps0) # (!p1 & ps4)))	/* pseudocolors mode */
+B = BL_n & (
+	  ((!vm4 & !vm1) & ((p2 & !p1) # (!p2 & (p1 & vm0))))		/* standart mode */
+	# ((!vm4 & vm1) & ((p1 & ps0) # (!p1 & ps4)))				/* pseudocolors mode */
 	# (vm4 & p4));
+IR = BL_n & (
+	  ((!vm4 & !vm1) & ((p2 & p1) # (!p2 & (p1 & vm0))))		/* standart mode */
+	# ((!vm4 & vm1) & ((p1 & ps2 & ps3) # (!p1 & ps6 & ps7)))	/* pseudocolors mode */
+	# (vm4 & p2 & p3));	
+IG = BL_n & (
+	  ((!vm4 & !vm1) & (!p2 & (p1 & !vm0)))						/* standart mode */
+	# ((!vm4 & vm1) & ((p1 & ps1 & ps3) # (!p1 & ps5 & ps7)))	/* pseudocolors mode */
+	# (vm4 & p2 & p1));
+IB = BL_n & (
+	  ((!vm4 & !vm1) & ((p2 & !p1) # (!p2 & (p1 & vm0))))		/* standart mode */
+	# ((!vm4 & vm1) & ((p1 & ps0 & ps3) # (!p1 & ps4 & ps7)))	/* pseudocolors mode */
+	# (vm4 & p2 & p4));

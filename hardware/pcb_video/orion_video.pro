@@ -1,4 +1,4 @@
-update=Пн 07 мая 2018 14:45:14
+update=07.05.2018 19:13:53
 version=1
 last_client=kicad
 [pcbnew]
@@ -45,3 +45,5 @@ LibName3=power
 LibName4=conn
 LibName5=Lattice
 LibName6=/media/Dev/Projects/Orion/hardware/orion
+LibName7=D:/Projects/Orion-NG/hardware/orion
+LibName8=74xgxx
