@@ -20,11 +20,10 @@ PIN  19  = hsp;
 PIN  18  = hs;
 PIN  17  = col0;
 PIN  16  = col1;
-PIN  15  = be;
-PIN  14  = bee;
+PIN  15  = mcpu;
+PIN  14  = vcol;
 
 xresn    = !(x9 & x8 & x4 & x3 & x2 & x1 & x0);
-be = x2 & x1 & x0;
 ben = !(x2 & x1 & x0);
 bh = (!sr16 & (!x9 & ((!x8 & x7)
 					# (!x7 & (x6 # x5 # x4 # x3))
@@ -39,8 +38,10 @@ bh = (!sr16 & (!x9 & ((!x8 & x7)
 xle = ((!sr16 & !x6) # (sr16 & x6)) & (x9 & !x8 & x7 & x5 & !x4 & !x3 & x2 & x1 & x0);
 hsp = x9 & !x8 & ((!sr16 & !x7 & ((x6 & !x5) # (x5 & (!x3 # !x4)) # (!x6 & x4 & x3)))
 				# ( sr16 & ((!x7 & x6 & ((x4 & x3) # x5)) # (x7 & !x6 & (!x5 # !x4 # !x3)))));
-hs5 = (!x7 & x6 & ((x4 & x3) # x5)) # (x7 & !x6 & (!x5 # !x4 # !x3));
 hs = !(wen $ hsp);
 
 col0 = !(x2 & !x1);
 col1 =  (x2 # x1);
+
+mcpu = x0;
+vcol = x1;
