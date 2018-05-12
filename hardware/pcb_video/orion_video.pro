@@ -1,4 +1,4 @@
-update=07.05.2018 19:13:53
+update=12.05.2018 11:27:18
 version=1
 last_client=kicad
 [pcbnew]
@@ -47,3 +47,4 @@ LibName5=Lattice
 LibName6=/media/Dev/Projects/Orion/hardware/orion
 LibName7=D:/Projects/Orion-NG/hardware/orion
 LibName8=74xgxx
+LibName9=C:/Program Files/KiCad/share/kicad/library/memory
