@@ -1,4 +1,4 @@
-update=12.05.2018 11:27:18
+update=15.05.2018 21:55:35
 version=1
 last_client=kicad
 [pcbnew]
@@ -40,11 +40,11 @@ version=1
 LibDir=
 [eeschema/libraries]
 LibName1=orion_video-rescue
-LibName2=device
-LibName3=power
-LibName4=conn
-LibName5=Lattice
-LibName6=/media/Dev/Projects/Orion/hardware/orion
-LibName7=D:/Projects/Orion-NG/hardware/orion
+LibName2=/media/Dev/Projects/Orion/hardware/orion
+LibName3=D:/Projects/Orion-NG/hardware/orion
+LibName4=device
+LibName5=power
+LibName6=conn
+LibName7=Lattice
 LibName8=74xgxx
 LibName9=C:/Program Files/KiCad/share/kicad/library/memory

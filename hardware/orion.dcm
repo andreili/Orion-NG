@@ -22,6 +22,11 @@ D SDRAM
 K SDRAM 256K 16BIT
 $ENDCMP
 #
+$CMP C96ABC
+D Connector Europe, 96 contacts, ranges A,B,C
+K connector
+$ENDCMP
+#
 $CMP CY7C1049B
 D SRAM
 K SRAM 512K 8BIT
