@@ -17,7 +17,7 @@ entity cpu_ports is
 
 		qrd			:	 OUT STD_LOGIC;
 		intn			:	 OUT STD_LOGIC;
-		MA				:	 OUT STD_LOGIC_VECTOR(19 downto 14);
+		MA				:	 OUT STD_LOGIC_VECTOR(20 downto 14);
 		rom1_sel		:	 OUT STD_LOGIC;
 		rom2_sel		:	 OUT STD_LOGIC;
 		ctrl_turbo_n:	 OUT STD_LOGIC;
@@ -74,9 +74,9 @@ signal pF9					: std_logic;
 -- control signals
 signal ctrl_rom2_addr	: std_logic_vector(2 downto 0);
 signal ctrl_1C				: std_logic_vector(7 downto 0);
-signal ctrl_2A				: std_logic_vector(5 downto 0);
-signal ctrl_2B				: std_logic_vector(5 downto 0);
-signal ctrl_2C				: std_logic_vector(5 downto 0);
+signal ctrl_2A				: std_logic_vector(6 downto 0);
+signal ctrl_2B				: std_logic_vector(6 downto 0);
+signal ctrl_2C				: std_logic_vector(6 downto 0);
 signal ctrl_o128			: std_logic;
 signal ctrl_intt			: std_logic;
 signal ctrl_rom			: std_logic;
@@ -94,10 +94,10 @@ signal irq0n				: std_logic;
 signal irq_vector			: std_logic_vector(2 downto 0);
 
 -- RAM controls
-signal ram_page_z80		: std_logic_vector(3 downto 0);
-signal ram_page_pro		: std_logic_vector(3 downto 0);
-signal ctrl_ram_addr		: std_logic_vector(3 downto 0);
-signal MA_inner			: std_logic_vector(19 downto 14);
+signal ram_page_z80		: std_logic_vector(4 downto 0);
+signal ram_page_pro		: std_logic_vector(4 downto 0);
+signal ctrl_ram_addr		: std_logic_vector(4 downto 0);
+signal MA_inner			: std_logic_vector(20 downto 14);
 
 begin
 
@@ -208,33 +208,33 @@ begin
 		ctrl_2A <= (others => '0');
 	elsif (rising_edge(wrn)) then
 		if ((P04 = '1') and (addr(1) = '0') and (addr(0) = '0')) then
-			ctrl_2A <= data(5 downto 0);
+			ctrl_2A <= data(6 downto 0);
 		end if;
 	end if;
 end process;
-data <= "00" & ctrl_2A when ((P04 = '1') and (addr(1) = '0') and (addr(0) = '0') and (rdn = '0')) else (others => 'Z');
+data <= "0" & ctrl_2A when ((P04 = '1') and (addr(1) = '0') and (addr(0) = '0') and (rdn = '0')) else (others => 'Z');
 memp1: process (resetn, wrn)
 begin
 	if (resetn = '0') then
 		ctrl_2B <= (others => '0');
 	elsif (rising_edge(wrn)) then 
 		if ((P04 = '1') and (addr(1) = '0') and (addr(0) = '1')) then
-			ctrl_2B <= data(5 downto 0);
+			ctrl_2B <= data(6 downto 0);
 		end if;
 	end if;
 end process;
-data <= "00" & ctrl_2B when ((P04 = '1') and (addr(1) = '0') and (addr(0) = '1') and (rdn = '0')) else (others => 'Z');
+data <= "0" & ctrl_2B when ((P04 = '1') and (addr(1) = '0') and (addr(0) = '1') and (rdn = '0')) else (others => 'Z');
 memp2: process (resetn, wrn)
 begin
 	if (resetn = '0') then
 		ctrl_2C <= (others => '0');
 	elsif (rising_edge(wrn)) then
 		if ((P04 = '1') and (addr(1) = '1') and (addr(0) = '0')) then
-			ctrl_2C <= data(5 downto 0);
+			ctrl_2C <= data(6 downto 0);
 		end if;
 	end if;
 end process;
-data <= "00" & ctrl_2C when ((P04 = '1') and (addr(1) = '1') and (addr(0) = '0') and (rdn = '0')) else (others => 'Z');
+data <= "0" & ctrl_2C when ((P04 = '1') and (addr(1) = '1') and (addr(0) = '0') and (rdn = '0')) else (others => 'Z');
 
 -- RAM dispatching
 mempz80: process (resetn, pF9)
@@ -242,7 +242,7 @@ begin
 	if (resetn = '0') then
 		ram_page_z80 <= (others => '0');
 	elsif (rising_edge(pF9)) then
-		ram_page_z80 <= data(3 downto 0);
+		ram_page_z80 <= data(4 downto 0);
 	end if;
 end process;
 
@@ -252,11 +252,11 @@ begin
 		ram_page_pro <= (others => '0');
 	elsif (rising_edge(wrn)) then
 		if ((P08 = '1') and (addr(1) = '0') and (addr(0) = '0')) then
-			ram_page_pro <= data(3 downto 0);
+			ram_page_pro <= data(4 downto 0);
 		end if;
 	end if;
 end process;
-data <= "1111" & ram_page_pro when ((P08 = '1') and (addr(1) = '0') and (addr(0) = '0') and (rdn = '0')) else (others => 'Z');
+data <= "111" & ram_page_pro when ((P08 = '1') and (addr(1) = '0') and (addr(0) = '0') and (rdn = '0')) else (others => 'Z');
 
 ctrl_ram_addr <= ram_page_z80 when (ctrl_o128 = '1') else ram_page_pro;
 
@@ -284,8 +284,12 @@ MA_inner(19) <= ctrl_2A(5) when ((ctrl_mb(0)='0') and (ctrl_mb(1)='0'))
 			  else ctrl_2B(5) when ((ctrl_mb(0)='0') and (ctrl_mb(1)='1'))
 			  else ctrl_2C(5) when ((ctrl_mb(0)='1') and (ctrl_mb(1)='0'))
 			  else ctrl_ram_addr(3);
+MA_inner(20) <= ctrl_2A(6) when ((ctrl_mb(0)='0') and (ctrl_mb(1)='0'))
+			  else ctrl_2B(6) when ((ctrl_mb(0)='0') and (ctrl_mb(1)='1'))
+			  else ctrl_2C(6) when ((ctrl_mb(0)='1') and (ctrl_mb(1)='0'))
+			  else ctrl_ram_addr(4);
 MA(15 downto 14) <= MA_inner(15 downto 14);
-MA(19 downto 16) <= MA_inner(19 downto 16) when (ma_sel = '1') else (others => '1');
+MA(20 downto 16) <= MA_inner(20 downto 16) when (ma_sel = '1') else (others => '1');
 
 -- memory controls
 process (resetn, wrn)

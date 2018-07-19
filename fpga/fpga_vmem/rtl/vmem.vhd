@@ -6,7 +6,8 @@ use ieee.numeric_std.all;
 entity vmem is
 	port 
 	(
-		clk			:	 IN STD_LOGIC;
+		clk_25		:	 IN STD_LOGIC;
+		clk_shifted	:	 IN STD_LOGIC;
 		-- controls
 		wide_en		:	 IN STD_LOGIC;
 		clk_sel		:	 IN STD_LOGIC;
@@ -104,6 +105,9 @@ architecture rtl of vmem is
 		);
 	end component;
 
+signal clk_50			: std_logic;
+signal clk				: std_logic;
+
 signal x					: std_logic_vector(9 downto 0);
 signal BE				: std_logic;
 signal BH				: std_logic;
@@ -131,6 +135,15 @@ signal mem_rd_strobe	: std_logic;
 signal mem_ro_strobe	: std_logic;
 
 begin
+
+clk_50 <= clk_25 xor clk_shifted;
+
+process (clk_50)
+begin
+	if (rising_edge(clk_50)) then
+		clk <= not clk;
+	end if;
+end process;
 
 cx: counter_x
 	port map (
@@ -188,17 +201,17 @@ vb(0) <= (not video_bank(0)) when (video_mode4='0') else x(0);
 vb(1) <= not video_bank(1);
 
 -- video memory column
-col(0) <= ((not x(1)) and (not x(2)) and x(0) and clk);
-col(1) <= ((not x(1)) and x(2) and x(0) and clk);
+col(0) <= ((not x(1)) and (not x(2)) and x(0) and clk and clk_50);
+col(1) <= ((not x(1)) and x(2) and x(0) and clk and clk_50);
 
 BEn <= not BE;
 
-mem_cpu <= x(1);
+mem_cpu <= x(0);
 
 MA <= VA(18 downto 17) & VA(15) & VA(14) & addr(13 downto 0) when (mem_cpu = '1')
 	else "00" & vb & x(8 downto 3) & y(7 downto 0);
 
-MWE <= mem_wrn when ((mem_cpu = '1') and ((x(0) xor clk) = '1'))
+MWE <= mem_wrn when ((mem_cpu = '1') and ((clk xor clk_50) = '0'))
 	else '1';
 MOE <= mem_rdn when (mem_cpu = '1')
 	else '0';
@@ -220,7 +233,7 @@ MCE2 <= mem_bank(2) when (mem_cpu = '1')
 MCE3 <= mem_bank(3) when (mem_cpu = '1')
 	else '1';
 
-mem_rd_strobe <= (not mem_rdn) and mem_cpu and x(0) and clk;
+mem_rd_strobe <= (not mem_rdn) and mem_cpu and (clk xor clk_50);
 mem_rd0 <= (not VA(16)) when (mem_rd_strobe = '1')
 	else '0';
 mem_rd1 <= VA(16) when (mem_rd_strobe = '1')

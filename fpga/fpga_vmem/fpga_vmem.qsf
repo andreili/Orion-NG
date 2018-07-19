@@ -43,9 +43,9 @@ set_global_assignment -name ORIGINAL_QUARTUS_VERSION "13.0 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:53:07  JUNE 26, 2018"
 set_global_assignment -name LAST_QUARTUS_VERSION "13.0 SP1"
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
-set_global_assignment -name MAX7000_OPTIMIZATION_TECHNIQUE SPEED
+set_global_assignment -name MAX7000_OPTIMIZATION_TECHNIQUE BALANCED
 set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS OFF
-set_global_assignment -name MAX7000_FANIN_PER_CELL 90
+set_global_assignment -name MAX7000_FANIN_PER_CELL 100
 set_global_assignment -name IGNORE_CARRY_BUFFERS OFF
 set_global_assignment -name IGNORE_CASCADE_BUFFERS OFF
 set_global_assignment -name IGNORE_GLOBAL_BUFFERS OFF
@@ -57,9 +57,9 @@ set_global_assignment -name MAX7000_PARALLEL_EXPANDER_CHAIN_LENGTH 4
 set_global_assignment -name PARALLEL_SYNTHESIS ON
 set_global_assignment -name SYNTH_MESSAGE_LEVEL MEDIUM
 set_global_assignment -name SMART_RECOMPILE ON
-set_global_assignment -name AUTO_PARALLEL_EXPANDERS OFF
+set_global_assignment -name AUTO_PARALLEL_EXPANDERS ON
 set_global_assignment -name DEVICE_FILTER_PIN_COUNT 100
-set_global_assignment -name STATE_MACHINE_PROCESSING "MINIMAL BITS"
+set_global_assignment -name STATE_MACHINE_PROCESSING AUTO
 set_global_assignment -name MAX7000_DEVICE_IO_STANDARD "3.3-V LVTTL"
 set_global_assignment -name VHDL_FILE rtl/vmem.vhd
 set_global_assignment -name VHDL_FILE rtl/video_ports.vhd
