@@ -32,3 +32,13 @@ rescue-backup
 # Proteus files
 *.pdsbak
 *.workspace
+
+# Quartus files
+*.cdb
+*.qmsg
+*.hdb
+*.logdb
+*.rdb
+*.db_info
+db/*
+out/*

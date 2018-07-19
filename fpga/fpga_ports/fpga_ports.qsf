@@ -1,0 +1,125 @@
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 1991-2013 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus II 64-Bit
+# Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
+# Date created = 19:53:07  June 26, 2018
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		fpga_vmem_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus II software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
+
+
+set_global_assignment -name FAMILY MAX7000S
+set_global_assignment -name DEVICE "EPM7128STC100-10"
+set_global_assignment -name TOP_LEVEL_ENTITY cpu_ports
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION "13.0 SP1"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "19:53:07  JUNE 26, 2018"
+set_global_assignment -name LAST_QUARTUS_VERSION "13.0 SP1"
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name DEVICE_FILTER_PACKAGE TQFP
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 100
+set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 10
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR "-1"
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+
+set_global_assignment -name MAX7000_DEVICE_IO_STANDARD TTL
+set_location_assignment PIN_1 -to sdata[0]
+set_location_assignment PIN_2 -to sdata[1]
+set_location_assignment PIN_4 -to TDI
+set_location_assignment PIN_5 -to sdata[2]
+set_location_assignment PIN_6 -to sdata[3]
+set_location_assignment PIN_7 -to sdata[4]
+set_location_assignment PIN_8 -to sdata[5]
+set_location_assignment PIN_9 -to sdata[6]
+set_location_assignment PIN_10 -to sdata[7]
+set_location_assignment PIN_12 -to sintn
+set_location_assignment PIN_14 -to sdata_rdyn
+set_location_assignment PIN_13 -to sdata_int
+set_location_assignment PIN_15 -to TMS
+set_location_assignment PIN_17 -to config[0]
+set_location_assignment PIN_19 -to config[1]
+set_location_assignment PIN_20 -to config[2]
+set_location_assignment PIN_21 -to config[3]
+set_location_assignment PIN_22 -to config[4]
+set_location_assignment PIN_24 -to config[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to sdata[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to sdata_rdyn
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to sdata[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to sdata[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to sdata[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to sdata[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to sdata[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to sdata[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to sdata[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to sintn
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to sdata_int
+set_location_assignment PIN_23 -to config[7]
+set_location_assignment PIN_25 -to config[76
+set_location_assignment PIN_27 -to mem_rdn
+set_location_assignment PIN_28 -to mem_wrn
+set_location_assignment PIN_29 -to ctrl_turbo_n
+set_location_assignment PIN_30 -to int50Hz
+set_location_assignment PIN_31 -to MA[14]
+set_location_assignment PIN_32 -to MA[15]
+set_location_assignment PIN_33 -to MA[16]
+set_location_assignment PIN_35 -to MA[17]
+set_location_assignment PIN_36 -to MA[18]
+set_location_assignment PIN_37 -to MA[19]
+set_location_assignment PIN_40 -to addr[0]
+set_location_assignment PIN_41 -to addr[1]
+set_location_assignment PIN_42 -to addr[2]
+set_location_assignment PIN_44 -to addr[3]
+set_location_assignment PIN_45 -to addr[4]
+set_location_assignment PIN_46 -to addr[5]
+set_location_assignment PIN_47 -to addr[6]
+set_location_assignment PIN_48 -to addr[7]
+set_location_assignment PIN_49 -to addr[8]
+set_location_assignment PIN_50 -to addr[9]
+set_location_assignment PIN_52 -to addr[10]
+set_location_assignment PIN_53 -to addr[11]
+set_location_assignment PIN_54 -to addr[12]
+set_location_assignment PIN_55 -to addr[13]
+set_location_assignment PIN_56 -to addr[14]
+set_location_assignment PIN_57 -to addr[15]
+set_location_assignment PIN_62 -to TCK
+set_location_assignment PIN_73 -to TDO
+set_location_assignment PIN_87 -to clk
+set_location_assignment PIN_100 -to data[7]
+set_location_assignment PIN_99 -to data[6]
+set_location_assignment PIN_98 -to data[5]
+set_location_assignment PIN_97 -to data[4]
+set_location_assignment PIN_96 -to data[3]
+set_location_assignment PIN_94 -to data[2]
+set_location_assignment PIN_93 -to data[1]
+set_location_assignment PIN_92 -to data[0]
+set_global_assignment -name MAX7000_OPTIMIZATION_TECHNIQUE AREA
+set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS OFF
+set_global_assignment -name VHDL_FILE rtl/cpu_ports.vhd
