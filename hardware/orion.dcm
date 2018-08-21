@@ -32,6 +32,21 @@ D SRAM
 K SRAM 512K 8BIT
 $ENDCMP
 #
+$CMP CY7C1049D
+D SRAM
+K SRAM 512K 8BIT
+$ENDCMP
+#
+$CMP DB15_Female_HighDensity_MountingHoles
+D 15-pin female D-SUB connector, High density (3 columns), Triple Row, Generic, VGA-connector, Mounting Hole
+K connector db15 female D-SUB VGA
+$ENDCMP
+#
+$CMP IDT7028PF
+D SDRAM
+K Dual ported SDRAM 64K 16BIT
+$ENDCMP
+#
 $CMP IE18
 D SYNCHRONOUS 4-BIT COUNTER
 $ENDCMP
@@ -68,8 +83,25 @@ $CMP LN1
 D NOT 1gate
 $ENDCMP
 #
+$CMP SW_DIP_x08
+D 8x DIP Switch, Single Pole Single Throw (SPST) switch, small symbol
+K dip switch
+$ENDCMP
+#
 $CMP TM2
 D Dual D-trigger
+$ENDCMP
+#
+$CMP Z80CPU
+D 8-bit General Purpose Microprocessor, DIP-40
+K Z80 CPU uP
+F www.zilog.com/manage_directlink.php?filepath=docs/z80/um0080
+$ENDCMP
+#
+$CMP Z84C
+D 8-bit General Purpose Microprocessor, LQFP-44
+K Z80 CPU uP
+F www.zilog.com/manage_directlink.php?filepath=docs/z80/um0080
 $ENDCMP
 #
 #End Doc Library
