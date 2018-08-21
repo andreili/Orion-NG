@@ -345,10 +345,8 @@ begin
 	process (RESET_n, CLK_n)
 	begin
 		if RESET_n = '0' then
-			--PC <= "1111100000000000";  -- Program Counter
-			--A <= "1111100000000000";
-			PC <= "0000000000000000";  -- Program Counter
-			A <= "0000000000000000";
+			PC <= (others => '0');  -- Program Counter
+			A <= (others => '0');
 			TmpAddr <= (others => '0');
 			IR <= "00000000";
 			ISet <= "00";

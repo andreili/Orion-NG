@@ -58,12 +58,12 @@
 --
 --	0247 : Fixed bus req/ack cycle
 --
- 
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 use work.T80_Pack.all;
- 
+
 entity T80a is
 	generic(
 		Mode : integer := 0	-- 0 => Z80, 1 => Fast Z80, 2 => 8080, 3 => GB
@@ -87,9 +87,9 @@ entity T80a is
 		D			: inout std_logic_vector(7 downto 0)
 	);
 end T80a;
- 
+
 architecture rtl of T80a is
- 
+
 	signal CEN			: std_logic;
 	signal Reset_s		: std_logic;
 	signal IntCycle_n	: std_logic;
@@ -112,15 +112,15 @@ architecture rtl of T80a is
 	signal Wait_s		: std_logic;
 	signal MCycle		: std_logic_vector(2 downto 0);
 	signal TState		: std_logic_vector(2 downto 0);
- 
+
 begin
- 
+
 	CEN <= '1';
- 
+
 	BUSAK_n <= BUSAK_n_i;
 	MREQ_n_i <= not MREQ or (Req_Inhibit and MReq_Inhibit);
 	RD_n_i <= not RD or Req_Inhibit;
- 
+
 	MREQ_n <= MREQ_n_i when BUSAK_n_i = '1' else 'Z';
 	IORQ_n <= IORQ_n_i when BUSAK_n_i = '1' else 'Z';
 	RD_n <= RD_n_i when BUSAK_n_i = '1' else 'Z';
@@ -128,7 +128,7 @@ begin
 	RFSH_n <= RFSH_n_i when BUSAK_n_i = '1' else 'Z';
 	A <= A_i when BUSAK_n_i = '1' else (others => 'Z');
 	D <= DO when Write = '1' and BUSAK_n_i = '1' else (others => 'Z');
- 
+
 	process (RESET_n, CLK_n)
 	begin
 		if RESET_n = '0' then
@@ -137,7 +137,7 @@ begin
 			Reset_s <= '1';
 		end if;
 	end process;
- 
+
 	u0 : T80
 		generic map(
 			Mode => Mode,
@@ -164,7 +164,7 @@ begin
 			MC => MCycle,
 			TS => TState,
 			IntCycle_n => IntCycle_n);
- 
+
 	process (CLK_n)
 	begin
 		if CLK_n'event and CLK_n = '0' then
@@ -174,19 +174,19 @@ begin
 			end if;
 		end if;
 	end process;
- 
+
 	process (Reset_s,CLK_n)
 	begin
 		if Reset_s = '0' then
 			WR_n_i <= '1';
-		elsif CLK_n'event and CLK_n = '0' then
+		elsif CLK_n'event and CLK_n = '1' then
 			WR_n_i <= '1';
-			if TState = "010" then	-- To short for IO writes !!!!!!!!!!!!!!!!!!!
-				WR_n_i <= not Write; 
+			if TState = "001" then	-- To short for IO writes !!!!!!!!!!!!!!!!!!!
+				WR_n_i <= not Write;
 			end if;
 		end if;
 	end process;
- 
+
 	process (Reset_s,CLK_n)
 	begin
 		if Reset_s = '0' then
@@ -199,7 +199,7 @@ begin
 			end if;
 		end if;
 	end process;
- 
+
 	process (Reset_s,CLK_n)
 	begin
 		if Reset_s = '0' then
@@ -212,7 +212,7 @@ begin
 			end if;
 		end if;
 	end process;
- 
+
 	process(Reset_s,CLK_n)
 	begin
 		if Reset_s = '0' then
@@ -220,7 +220,7 @@ begin
 			IORQ_n_i <= '1';
 			MREQ <= '0';
 		elsif CLK_n'event and CLK_n = '0' then
- 
+
 			if MCycle = "001" then
 				if TState = "001" then
 					RD <= IntCycle_n;
@@ -249,6 +249,5 @@ begin
 			end if;
 		end if;
 	end process;
- 
+
 end;
- 
