@@ -95,7 +95,7 @@ architecture rtl of orion is
 			pFB			:	 IN std_logic;
 			pFC			:	 IN std_logic;
 			-- RAM dispatcher signal
-			ram_cen_v	:	 IN STD_LOGIC_VECTOR(1 downto 0);
+			ram_cen_v	:	 IN STD_LOGIC;
 			ram_lbn		:	 IN STD_LOGIC;
 			ram_ubn		:	 IN STD_LOGIC;
 			ram_rdn		:	 IN STD_LOGIC;
@@ -129,7 +129,7 @@ architecture rtl of orion is
 			rdn			:	 OUT STD_LOGIC;
 			m1n			:	 OUT STD_LOGIC;
 			-- RAM dispatcher signal
-			ram_cen_v	:	 OUT STD_LOGIC_VECTOR(1 downto 0);
+			ram_cen_v	:	 OUT STD_LOGIC;
 			ram_lbn		:	 OUT STD_LOGIC;
 			ram_ubn		:	 OUT STD_LOGIC;
 			ram_rdn		:	 OUT STD_LOGIC;
@@ -197,7 +197,7 @@ signal wrn					: std_logic;
 signal rdn					: std_logic;
 signal m1n					: std_logic;
 signal blion				: std_logic;
-signal ram_cen_v			: std_logic_vector(1 downto 0);
+signal ram_cen_v			: std_logic;
 signal ram_lbn				: std_logic;
 signal ram_ubn				: std_logic;
 signal ram_rdn				: std_logic;

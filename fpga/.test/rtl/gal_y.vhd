@@ -7,6 +7,7 @@ entity gal_y is
 		clk			:	 IN STD_LOGIC;
 		wide_en		:	 IN STD_LOGIC;
 		BH				:	 IN STD_LOGIC;
+		XRESN			:	 IN STD_LOGIC;
 		y				:	 IN STD_LOGIC_VECTOR(9 downto 0);
 		YRESN			:	 OUT STD_LOGIC;
 		blank_n		:	 OUT STD_LOGIC;
@@ -17,49 +18,26 @@ end entity;
 
 architecture rtl of gal_y is
 
-signal YRES_W		: std_logic;
-signal YRES_N		: std_logic;
-signal VS_1			: std_logic;
-signal VS_W			: std_logic;
-signal VS_N			: std_logic;
-signal VS_pre		: std_logic;
-
-signal BV			: std_logic;
+--signal BV			: std_logic;
 signal frame		: std_logic_vector(2 downto 0);
 
 begin
 
-YRES_W <= '0' when (y="0111000000") else '1';	-- 448
-YRES_N <= '0' when (y="1000001100") else '1';	-- 524
-YRESN <= YRES_N when (wide_en='0') else YRES_W;
+YRESN <= not ((wide_en and y(9) and y(3) and y(2)) or ((not wide_en) and y(8) and y(7) and y(6)));
 
-BV <= y(9) or y(8);
+VS <= not ((((not y(5)) and (not y(3)) and y(2) and (not y(1)) and wide_en) or 
+			(y(5) and y(3) and (not y(2)) and y(1) and (not wide_en))) and 
+			(not y(9)) and y(8) and (not y(7)) and y(6) and y(4));
 
--- vertical sync signal
-VS_pr: process (clk)
+process (y(9), YRESN)
 begin
-	if (rising_edge(clk)) then
-		if (((y = "0101111001") and (wide_en='0')) or ((y = "0101010100") and (wide_en='1'))) then	-- 377 340
-			VS <= '0';
-		elsif (((y = "0101111011") and (wide_en='0')) or ((y = "0101010110") and (wide_en='1'))) then	-- 379 342
-			VS <= '1';
-		end if;
+	if (XRESN = '0') then
+		int50 <= '1';
+	elsif (rising_edge(y(9))) then
+		int50 <= '0';
 	end if;
 end process;
 
-process (BV)
-begin
-	if (rising_edge(BV)) then
-		if (frame = "110") then
-			frame <= "000";
-		else
-			frame <= frame + '1';
-		end if;
-	end if;
-end process;
-
-int50 <= BV when (frame /= "110") else '0';
-
-blank_n <= (not BH) and (not BV);
+blank_n <= BH and (not y(9)) and (not y(8));
 
 end rtl;

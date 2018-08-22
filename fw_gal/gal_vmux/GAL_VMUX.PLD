@@ -26,22 +26,22 @@ PIN  23 = IB;
 
 R = BL_n & (
 	  ((!vm4 & !vm1) & ((p2 & p1) # (!p2 & (p1 & vm0))))		/* standart mode */
-	# ((!vm4 & vm1) & ((p1 & ps2) # (!p1 & ps6)))				/* pseudocolors mode */
+	# ((!vm4 & vm1) & ((p1 & ps2) # (!p1 & ps6)))			/* pseudocolors mode */
 	# (vm4 & p3));	
 G = BL_n & (
-	  ((!vm4 & !vm1) & (!p2 & (p1 & !vm0)))						/* standart mode */
-	# ((!vm4 & vm1) & ((p1 & ps1) # (!p1 & ps5)))				/* pseudocolors mode */
+	  ((!vm4 & !vm1) & (!p2 & (p1 & !vm0)))				/* standart mode */
+	# ((!vm4 & vm1) & ((p1 & ps1) # (!p1 & ps5)))			/* pseudocolors mode */
 	# (vm4 & p1));
 B = BL_n & (
 	  ((!vm4 & !vm1) & ((p2 & !p1) # (!p2 & (p1 & vm0))))		/* standart mode */
-	# ((!vm4 & vm1) & ((p1 & ps0) # (!p1 & ps4)))				/* pseudocolors mode */
+	# ((!vm4 & vm1) & ((p1 & ps0) # (!p1 & ps4)))			/* pseudocolors mode */
 	# (vm4 & p4));
 IR = BL_n & (
 	  ((!vm4 & !vm1) & ((p2 & p1) # (!p2 & (p1 & vm0))))		/* standart mode */
 	# ((!vm4 & vm1) & ((p1 & ps2 & ps3) # (!p1 & ps6 & ps7)))	/* pseudocolors mode */
 	# (vm4 & p2 & p3));	
 IG = BL_n & (
-	  ((!vm4 & !vm1) & (!p2 & (p1 & !vm0)))						/* standart mode */
+	  ((!vm4 & !vm1) & (!p2 & (p1 & !vm0)))				/* standart mode */
 	# ((!vm4 & vm1) & ((p1 & ps1 & ps3) # (!p1 & ps5 & ps7)))	/* pseudocolors mode */
 	# (vm4 & p2 & p1));
 IB = BL_n & (

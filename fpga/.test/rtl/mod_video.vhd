@@ -26,7 +26,7 @@ entity mod_video is
 		pFB			:	 IN std_logic;
 		pFC			:	 IN std_logic;
 		-- RAM dispatcher signal
-		ram_cen_v	:	 IN STD_LOGIC_VECTOR(1 downto 0);
+		ram_cen_v	:	 IN STD_LOGIC;
 		ram_lbn		:	 IN STD_LOGIC;
 		ram_ubn		:	 IN STD_LOGIC;
 		ram_rdn		:	 IN STD_LOGIC;
@@ -56,12 +56,12 @@ architecture rtl of mod_video is
 
 	component gal_x is
 		port (
-			clk			:	 IN STD_LOGIC;
 			SR16			:	 IN STD_LOGIC;
 			wide_en		:	 IN STD_LOGIC;
 			clk_sel		:	 IN STD_LOGIC;
 			ctrl_turbo_n:	 IN STD_LOGIC;
 			x				:	 IN STD_LOGIC_VECTOR(9 downto 0);
+			col			:	 OUT STD_LOGIC;
 			clk_sig		:	 OUT STD_LOGIC;
 			XRESN			:	 OUT STD_LOGIC;
 			BEn			:	 OUT STD_LOGIC;
@@ -76,11 +76,28 @@ architecture rtl of mod_video is
 			clk			:	 IN STD_LOGIC;
 			wide_en		:	 IN STD_LOGIC;
 			BH				:	 IN STD_LOGIC;
+			XRESN			:	 IN STD_LOGIC;
 			y				:	 IN STD_LOGIC_VECTOR(9 downto 0);
 			YRESN			:	 OUT STD_LOGIC;
 			blank_n		:	 OUT STD_LOGIC;
 			int50			:	 OUT STD_LOGIC;
 			VS				:	 OUT STD_LOGIC
+		);
+	end component;
+
+	component gal_vout is
+		port 
+		(
+			blank_n		:	 IN STD_LOGIC;
+			video_mode0	:	 IN STD_LOGIC;
+			video_mode1	:	 IN STD_LOGIC;
+			video_mode2	:	 IN STD_LOGIC;
+			video_mode4	:	 IN STD_LOGIC;
+			ps				:	 IN STD_LOGIC_VECTOR(7 downto 0);
+			pxls			:	 IN STD_LOGIC_VECTOR(3 downto 0);
+			R				:	 OUT STD_LOGIC_VECTOR(1 downto 0);
+			G				:	 OUT STD_LOGIC_VECTOR(1 downto 0);
+			B				:	 OUT STD_LOGIC_VECTOR(1 downto 0)
 		);
 	end component;
 
@@ -103,11 +120,12 @@ architecture rtl of mod_video is
 
 -- video signals
 signal blank_n			: std_logic;
-signal BEn				: std_logic;
-signal MA_cnt			: std_logic_vector(13 downto 0);
+signal column			: std_logic;
 signal vb				: std_logic_vector(1 downto 0);
+signal col				: std_logic_vector(1 downto 0);
 
 signal x					: std_logic_vector(9 downto 0);
+signal BEn				: std_logic;
 signal BH				: std_logic;
 signal XLE				: std_logic;
 signal XRESN			: std_logic;
@@ -116,6 +134,7 @@ signal y					: std_logic_vector(9 downto 0);
 signal YRESN			: std_logic;
 
 signal wrdata			: std_logic_vector (31 downto 0);
+signal vmem				: std_logic_vector (16 downto 0);
 signal vdata			: std_logic_vector (31 downto 0);
 
 signal mem_data		: std_logic_vector (31 downto 0);
@@ -123,11 +142,11 @@ signal vmem_sel		: std_logic_vector (3 downto 0);
 
 -- video ports data
 signal SR16				: std_logic;
-signal video_mode			: std_logic_vector(4 downto 0);
-signal video_bank			: std_logic_vector(1 downto 0);
-signal ps1					: std_logic_vector (7 downto 0);
-signal ps2					: std_logic_vector (7 downto 0);
-signal ps					: std_logic_vector (7 downto 0);
+signal video_mode		: std_logic_vector(4 downto 0);
+signal video_bank		: std_logic_vector(1 downto 0);
+signal ps1				: std_logic_vector (7 downto 0);
+signal ps2				: std_logic_vector (7 downto 0);
+signal ps				: std_logic_vector (7 downto 0);
 
 signal res_cnt			: std_logic_vector(5 downto 0);
 
@@ -137,8 +156,6 @@ signal preg1		: std_logic_vector(7 downto 0);
 signal preg2		: std_logic_vector(7 downto 0);
 signal preg3		: std_logic_vector(7 downto 0);
 signal pxls			: std_logic_vector(3 downto 0);
-
-signal vb_cnt		: std_logic;
 
 signal vm14			: std_logic;
 signal vm12			: std_logic;
@@ -163,14 +180,14 @@ cntx: cnt_sync
 		x
 	);
 
-hx: gal_x
+gx: gal_x
 	port map (
-		clk,
-		SR16,
+		clk_sel,
 		wide_en,
 		clk_sel,
 		ctrl_turbo_n,
 		x,
+		column,
 		clk_sig,
 		XRESN,
 		BEn,
@@ -193,14 +210,13 @@ gy: gal_y
 		clk,
 		wide_en,
 		BH,
+		XRESN,
 		y,
 		YRESN,
 		blank_n,
 		int50,
 		VS
 	);
-
-MA_cnt <= x(8 downto 3) & y(7 downto 0);
 
 -- port F8
 F8: process (pF8, resetn)
@@ -224,25 +240,18 @@ begin
 	end if;
 end process;
 
--- video banks managment
-process (clk)
-begin
-	if (rising_edge(clk)) then
-		vb_cnt <= not vb_cnt;
-	end if;
-end process;
+col(0) <= column and (not x(2));
+col(1) <= column and x(2);
 
-vb(0) <= (not video_bank(0)) when (video_mode(4)='0') else vb_cnt;
 vb(1) <= not video_bank(1);
+vb(0) <= not x(2);
 
-vmem_sel(0) <= (not ram_cen_v(0)) and (not ram_lbn) and ram_ubn;
-vmem_sel(1) <= (not ram_cen_v(0)) and ram_lbn and (not ram_ubn);
-vmem_sel(2) <= (not ram_cen_v(1)) and (not ram_lbn) and ram_ubn;
-vmem_sel(3) <= (not ram_cen_v(1)) and ram_lbn and (not ram_ubn);
+vmem_sel(0) <= (not ram_cen_v) and (not ram_lbn) and ram_ubn;
+vmem_sel(1) <= (not ram_cen_v) and ram_lbn and (not ram_ubn);
 
 b0: ram2p
 	port map (
-		address_a	=> vb & MA_cnt,
+		address_a	=> vb & x(8 downto 3) & y(7 downto 0),
 		address_b	=> ram_addr_hi & addr(13 downto 0),
 		clock			=> clk_mem,
 		data_a		=> "00000000",
@@ -251,7 +260,7 @@ b0: ram2p
 		rden_b		=> ((not ram_rdn) and vmem_sel(0)),
 		wren_a		=> '0',
 		wren_b		=> ((not ram_wrn) and vmem_sel(0)),
-		q_a			=> vdata(7 downto 0),
+		q_a			=> vmem(7 downto 0),
 		q_b			=> mem_data(7 downto 0)
 	);
 data <= mem_data(7 downto 0) when (vmem_sel(0)='1') and (ram_rdn='0')
@@ -259,7 +268,7 @@ data <= mem_data(7 downto 0) when (vmem_sel(0)='1') and (ram_rdn='0')
 
 b1: ram2p
 	port map (
-		address_a	=> vb & MA_cnt,
+		address_a	=> vb & x(8 downto 3) & y(7 downto 0),
 		address_b	=> ram_addr_hi & addr(13 downto 0),
 		clock			=> clk_mem,
 		data_a		=> "00000000",
@@ -268,45 +277,40 @@ b1: ram2p
 		rden_b		=> ((not ram_rdn) and vmem_sel(1)),
 		wren_a		=> '0',
 		wren_b		=> ((not ram_wrn) and vmem_sel(1)),
-		q_a			=> vdata(15 downto 8),
+		q_a			=> vmem(15 downto 8),
 		q_b			=> mem_data(15 downto 8)
 	);
 data <= mem_data(15 downto 8) when (vmem_sel(1)='1') and (ram_rdn='0')
 	else (others => 'Z');
 
-b2: ram2p
-	port map (
-		address_a	=> vb & MA_cnt,
-		address_b	=> ram_addr_hi & addr(13 downto 0),
-		clock			=> clk_mem,
-		data_a		=> "00000000",
-		data_b		=> data,
-		rden_a		=> '1',
-		rden_b		=> ((not ram_rdn) and vmem_sel(2)),
-		wren_a		=> '0',
-		wren_b		=> ((not ram_wrn) and vmem_sel(2)),
-		q_a			=> vdata(23 downto 16),
-		q_b			=> mem_data(23 downto 16)
-	);
-data <= mem_data(23 downto 16) when (vmem_sel(2)='1') and (ram_rdn='0')
-	else (others => 'Z');
+-- video registers
+vr0: process (col(0), vmem)
+begin
+	if (col(0) = '1') then
+		vdata(7 downto 0) <= vmem(7 downto 0);
+	end if;
+end process;
 
-b3: ram2p
-	port map (
-		address_a	=> vb & MA_cnt,
-		address_b	=> ram_addr_hi & addr(13 downto 0),
-		clock			=> clk_mem,
-		data_a		=> "00000000",
-		data_b		=> data,
-		rden_a		=> '1',
-		rden_b		=> ((not ram_rdn) and vmem_sel(3)),
-		wren_a		=> '0',
-		wren_b		=> ((not ram_wrn) and vmem_sel(3)),
-		q_a			=> vdata(31 downto 24),
-		q_b			=> mem_data(31 downto 24)
-	);
-data <= mem_data(31 downto 24) when (vmem_sel(3)='1') and (ram_rdn='0')
-	else (others => 'Z');
+vr1: process (col(0), vmem)
+begin
+	if (col(0) = '1') then
+		vdata(15 downto 8) <= vmem(15 downto 8);
+	end if;
+end process;
+
+vr2: process (col(1), vmem)
+begin
+	if (col(1) = '1') then
+		vdata(23 downto 16) <= vmem(7 downto 0);
+	end if;
+end process;
+
+vr3: process (col(1), vmem)
+begin
+	if (col(1) = '1') then
+		vdata(31 downto 24) <= vmem(15 downto 8);
+	end if;
+end process;
 
 -- color shift registers
 pxls(0) <= preg0(7);
@@ -380,80 +384,18 @@ end process;
 
 ps <= ps1 when (video_mode(3) = '1') else ps2;
 
--- video modes manage
-vm14 <= video_mode(1) or video_mode(4);
-vm12 <= not (video_mode(1) and video_mode(2) and (not video_mode(4)));
-vm_ps <= vm12 or (not blank_n);
-vm_st <= vm14 or (not blank_n);
-vm_pr <= not ((not blank_n) or (vm14 and vm12));
-sel16 <= (not blank_n) or (not video_mode(4));
-
--- video data switchers
-process (vm_st, pxls, video_mode)
-begin
-	if (vm_st = '1') then
-		RR <= 'Z';
-		GG <= 'Z';
-		BB <= 'Z';
-		II <= 'Z';
-	elsif (pxls(1) = '0') then
-		RR <= video_mode(0) and pxls(0);
-		GG <= video_mode(0) or pxls(0);
-		BB <= video_mode(0) and (not pxls(0));
-		II <= '0';
-	else
-		RR <= (not pxls(0));
-		GG <= '0';
-		BB <= pxls(0);
-		II <= '0';
-	end if;
-end process;
-
-process (vm_ps, pxls(0), ps)
-begin
-	if (vm_ps = '1') then
-		RR <= 'Z';
-		GG <= 'Z';
-		BB <= 'Z';
-		II <= 'Z';
-	elsif (pxls(0) = '0') then
-		BB <= ps(4);
-		GG <= ps(5);
-		RR <= ps(6);
-		II <= ps(7);
-	else
-		BB <= ps(0);
-		GG <= ps(1);
-		RR <= ps(2);
-		II <= ps(3);
-	end if;
-end process;
-
-process (vm_pr, sel16, pxls)
-begin
-	if (vm_pr = '1') then
-		RR <= 'Z';
-		GG <= 'Z';
-		BB <= 'Z';
-		II <= 'Z';
-	elsif (sel16 = '0') then
-		BB <= pxls(3);
-		GG <= pxls(0);
-		RR <= pxls(2);
-		II <= pxls(1);
-	else
-		BB <= '0';
-		GG <= '0';
-		RR <= '0';
-		II <= '0';
-	end if;
-end process;
-
-R(0) <= RR;
-R(1) <= RR and II;
-G(0) <= GG;
-G(1) <= GG and II;
-B(0) <= BB;
-B(1) <= BB and II;
+vo: gal_vout
+	port map (
+		blank_n,
+		video_mode(0),
+		video_mode(1),
+		video_mode(2),
+		video_mode(4),
+		ps,
+		pxls,
+		R,
+		G,
+		B
+	);
 
 end rtl;

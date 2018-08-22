@@ -20,7 +20,7 @@ entity mod_cpu is
 		rdn			:	 OUT STD_LOGIC;
 		m1n			:	 OUT STD_LOGIC;
 		-- RAM dispatcher signal
-		ram_cen_v	:	 OUT STD_LOGIC_VECTOR(1 downto 0);
+		ram_cen_v	:	 OUT STD_LOGIC;
 		ram_lbn		:	 OUT STD_LOGIC;
 		ram_ubn		:	 OUT STD_LOGIC;
 		ram_rdn		:	 OUT STD_LOGIC;
@@ -501,8 +501,7 @@ ram_ubn <= not ram_A16;
 
 ram_addr_hi <= MA(17 downto 14);
 
-ram_cen_v(0) <= MA_inner(20) or MA_inner(19) or MA_inner(18) or MA_inner(17);
-ram_cen_v(1) <= MA_inner(20) or MA_inner(19) or MA_inner(18) or (not MA_inner(17));
+ram_cen_v <= MA_inner(20) or MA_inner(19) or MA_inner(18) or MA_inner(17);
 
 ram_cen(0) <= MA_inner(20) or MA_inner(19) or (not MA_inner(18));
 ram_cen(1) <= MA_inner(20) or (not MA_inner(19));
@@ -510,7 +509,7 @@ ram_cen(2) <= (not MA_inner(20)) or MA_inner(19);
 ram_cen(3) <= MA_inner(20) nand MA_inner(19);
 
 ram_buf_wr <= wrn_in;
-ram_buf_oe <= blram or mr1 or (wrn_in and rdn_in) or (not MA_inner(18));
+ram_buf_oe <= blram or mr1 or (wrn_in and rdn_in) or (not (MA_inner(18) or MA_inner(17)));
 ram_buf_oe0 <= ram_buf_oe or ram_A16;
 ram_buf_oe1 <= ram_buf_oe or (not ram_A16);
 

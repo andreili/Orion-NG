@@ -1,4 +1,4 @@
-Name     orion_gal_x ;
+Name     gal_x ;
 PartNo   00 ;
 Date     05.05.2018 ;
 Revision 01 ;
@@ -10,17 +10,17 @@ Device   g22v10;
 
 PIN  [1..10] = [x0..9];
 PIN  11  = sr16; 
-PIN  13  = clk;
 
 PIN  23  = xresn;
 PIN  22  = ben;
 PIN  21  = bh;
 PIN  20  = xle;
 PIN  19  = hsp;
-PIN  18  = col0;
-PIN  17  = col1;
+PIN  18  = col;
+PIN  17  = clk_sel;
 PIN  16  = mcpu;
-PIN  15  = vcol;
+PIN  15  = turbo_n;
+PIN  14  = wide_en;
 
 xresn    = !(x9 & x8 & x4 & x3 & x2 & x1 & x0);
 ben = !(x2 & x1 & x0);
@@ -35,11 +35,15 @@ bh = (!sr16 & (!x9 & ((!x8 & x7)
 			  )
 	  );
 xle = ((!sr16 & !x6) # (sr16 & x6)) & (x9 & !x8 & x7 & x5 & !x4 & !x3 & x2 & x1 & x0);
-hsp = x9 & !x8 & ((!sr16 & !x7 & ((x6 & !x5) # (x5 & (!x3 # !x4)) # (!x6 & x4 & x3)))
-				# ( sr16 & ((!x7 & x6 & ((x4 & x3) # x5)) # (x7 & !x6 & (!x5 # !x4 # !x3)))));
+hsp = (x9 & !x8 & (
+	(sr16 & ((!x7 & x6 & x5) # (x7 & !x6))) # 
+	(!sr16 & !x7 & (x6 # x5 # x4 # x3))
+	)) $ wide_en;
 
-col0 = !x0 &  x1 & !clk;
-col1 = !x0 & !x1 & !clk;
+col = !x0 &  x1;
 
-mcpu = x0;
-vcol = x1;
+mcpu = (x2 & turbo_n) # (
+	(
+		(x0 & clk_sel) #
+		(x1 & !clk_sel)
+	) & !turbo_n);
