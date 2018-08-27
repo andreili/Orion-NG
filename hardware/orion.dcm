@@ -42,6 +42,12 @@ D 15-pin female D-SUB connector, High density (3 columns), Triple Row, Generic, 
 K connector db15 female D-SUB VGA
 $ENDCMP
 #
+$CMP Gen
+D Crystal Clock Oscillator, SMD package 7.5x5.0mm²
+K Crystal Clock Oscillator
+F http://www.iqdfrequencyproducts.com/products/details/iqxo-70-11-30.pdf
+$ENDCMP
+#
 $CMP IDT7028PF
 D SDRAM
 K Dual ported SDRAM 64K 16BIT
@@ -81,6 +87,11 @@ $ENDCMP
 #
 $CMP LN1
 D NOT 1gate
+$ENDCMP
+#
+$CMP SW_DIP_x03
+D 3x DIP Switch, Single Pole Single Throw (SPST) switch, small symbol
+K dip switch
 $ENDCMP
 #
 $CMP SW_DIP_x08
