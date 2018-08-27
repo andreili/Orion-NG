@@ -9,7 +9,7 @@ entity gal_x is
 		clk_sel		:	 IN STD_LOGIC;
 		ctrl_turbo_n:	 IN STD_LOGIC;
 		x				:	 IN STD_LOGIC_VECTOR(9 downto 0);
-		col			:	 OUT STD_LOGIC;
+		col			:	 OUT STD_LOGIC_VECTOR(1 downto 0);
 		clk_sig		:	 OUT STD_LOGIC;
 		XRESN			:	 OUT STD_LOGIC;
 		BEn			:	 OUT STD_LOGIC;
@@ -50,6 +50,7 @@ HS <= HS_pre xor wide_en;
 XLE <= ((x(6) and SR16) or ((not x(6)) and (not SR16))) and 
 			x(9) and (not x(8)) and x(7) and x(5) and (not x(4)) and (not x(3)) and x(2) and x(1) and x(0);
 
-col <= (not x(0)) and x(1);
+col(0) <= (not x(0)) and x(1) and (not x(2));
+col(1) <= (not x(0)) and x(1) and x(2);
 
 end rtl;

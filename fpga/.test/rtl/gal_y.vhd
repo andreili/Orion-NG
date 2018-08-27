@@ -23,7 +23,7 @@ signal frame		: std_logic_vector(2 downto 0);
 
 begin
 
-YRESN <= not ((wide_en and y(9) and y(3) and y(2)) or ((not wide_en) and y(8) and y(7) and y(6)));
+YRESN <= not (((not wide_en) and y(9) and y(3) and y(2)) or (wide_en and y(8) and y(7) and y(6)));
 
 VS <= not ((((not y(5)) and (not y(3)) and y(2) and (not y(1)) and wide_en) or 
 			(y(5) and y(3) and (not y(2)) and y(1) and (not wide_en))) and 

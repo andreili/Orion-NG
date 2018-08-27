@@ -13,7 +13,9 @@ entity orion_pio is
 		data			: inout std_logic_vector(7 downto 0);
 		rdn			: in  std_logic;
 		wrn			: in  std_logic;
-		ports_cs		: in  std_logic_vector(1 downto 0);
+		blion			: in  std_logic;
+		iorqn			: in  std_logic;
+		mreqn			: in  std_logic;
 		ps2_clk		: in  std_logic;
 		ps2_data		: in  std_logic
 	);
@@ -91,7 +93,60 @@ signal scan_key			: std_logic_vector(7 downto 0);	-- unused
 signal int_key				: std_logic;							-- unused
 signal reset_btn			: std_logic;
 
+signal fxxx					: std_logic;
+signal f4xx					: std_logic;
+signal fhxx					: std_logic;
+signal fhxx_sel			: std_logic;
+signal Ox_sel				: std_logic;
+signal pm					: std_logic;
+signal pmF4					: std_logic;
+signal pFB					: std_logic;
+signal pmF5					: std_logic;
+signal p08					: std_logic;
+signal p18					: std_logic;
+signal cs_F4				: std_logic;
+signal ctrl_o128			: std_logic;
+signal z80_port_en		: std_logic;
+signal p0A_wr				: std_logic;
+signal z80_full_RAM		: std_logic;
+
 begin
+
+-- ports decoding
+fxxx <= addr(12) and addr(13) and addr(14) and addr(15) and ctrl_o128 and z80_port_en;
+f4xx <= fxxx and (not addr(11)) and addr(10);
+fhxx <= iorqn or (not (blion and addr(3) and addr(4) and addr(5) and addr(6)));
+fhxx_sel <= addr(7) and (not (wrn)) and (not fhxx);
+Ox_sel <= (blion and (not (addr(5) or addr(6)))) and (not addr(7)) and (not iorqn);
+pm <= addr(11) and fxxx and (not (mreqn or wrn));
+pmF4 <= f4xx and    addr(10)  and (not addr(9)) and (not addr(8));
+pmF5 <= f4xx and    addr(10)  and (not addr(9)) and      addr(8);
+pFB  <= fhxx_sel and      addr(0)  and      addr(1)  and (not addr(2));
+p08 <= Ox_sel and (not addr(2)) and addr(3) and (not addr(4));
+p18 <= Ox_sel and (not addr(2)) and addr(3) and addr(4);
+cs_F4 <= not (p18 or pmF4);
+
+-- memory controls
+p0A_wr <= (not wrn) and P08 and addr(1) and (not addr(0));
+process (resetn, p0A_wr)
+begin
+	if (resetn = '0') then
+		ctrl_o128 <= '0';
+	elsif (falling_edge(p0A_wr)) then
+		ctrl_o128 <= data(7);
+	end if;
+end process;
+
+-- Z80-Card-II
+z80_port_en <= not (z80_full_RAM or (not addr(15)));
+FB: process (pFB, resetn)
+begin
+	if (resetn = '0') then
+		z80_full_RAM <= '0';
+	elsif (falling_edge(pFB)) then
+		z80_full_RAM <= data(5);
+	end if;
+end process;
 
 /*disk: rom_disk
 	port map (
@@ -109,7 +164,7 @@ port_1: i8255
 		addr(1 downto 0),
 		rdn,
 		wrn,
-		ports_cs(1),
+		not pmF5,
 		not resetn,
 		rom_data1,
 		rom_addr( 7 downto 0),
@@ -149,7 +204,7 @@ port_0: i8255
 		addr(1 downto 0),
 		rdn,
 		wrn,
-		ports_cs(0),
+		cs_F4,
 		not resetn,
 		kb_scan,
 		kb_out1,

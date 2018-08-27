@@ -95,6 +95,8 @@ architecture rtl of orion is
 			pFB			:	 IN std_logic;
 			pFC			:	 IN std_logic;
 			-- RAM dispatcher signal
+			ram_vm_oe0	:	 IN STD_LOGIC;
+			ram_vm_oe1	:	 IN STD_LOGIC;
 			ram_cen_v	:	 IN STD_LOGIC;
 			ram_lbn		:	 IN STD_LOGIC;
 			ram_ubn		:	 IN STD_LOGIC;
@@ -135,8 +137,6 @@ architecture rtl of orion is
 			ram_rdn		:	 OUT STD_LOGIC;
 			ram_wrn		:	 OUT STD_LOGIC;
 			ram_addr_hi	:	 OUT STD_LOGIC_VECTOR(17 downto 14);
-			cs_F4			:	 OUT STD_LOGIC;
-			cs_F5			:	 OUT STD_LOGIC;
 			snd			:	 OUT STD_LOGIC;
 			ctrl_turbo_n:	 OUT std_logic;
 			pF8			:	 OUT std_logic;
@@ -144,9 +144,10 @@ architecture rtl of orion is
 			pFB			:	 OUT std_logic;
 			pFC			:	 OUT std_logic;
 			ram_cen		:	 OUT std_logic_vector(3 downto 0);
-			ram_buf_wr	:	 OUT std_logic;
 			ram_buf_oe0	:	 OUT std_logic;
 			ram_buf_oe1	:	 OUT std_logic;
+			ram_vm_oe0	:	 OUT std_logic;
+			ram_vm_oe1	:	 OUT std_logic;
 			int50			:	 IN STD_LOGIC;
 			irqSn			:	 IN STD_LOGIC;
 			irq1n			:	 IN STD_LOGIC;
@@ -168,7 +169,9 @@ architecture rtl of orion is
 			data			: inout std_logic_vector(7 downto 0);
 			rdn			: in  std_logic;
 			wrn			: in  std_logic;
-			ports_cs		: in  std_logic_vector(1 downto 0);
+			blion			: in  std_logic;
+			iorqn			: in  std_logic;
+			mreqn			: in  std_logic;
 			ps2_clk		: in  std_logic;
 			ps2_data		: in  std_logic
 		);
@@ -213,8 +216,6 @@ signal irq5n				: std_logic;
 signal irq6n				: std_logic;
 signal irq7n				: std_logic;
 
-signal cs_F4				: std_logic;
-signal cs_F5				: std_logic;
 signal snd					: std_logic;
 signal pF8					: std_logic;
 signal pFA					: std_logic;
@@ -223,9 +224,10 @@ signal pFC					: std_logic;
 signal ctrl_turbo_n		: std_logic;
 
 signal ram_cen				: std_logic_vector(3 downto 0);
-signal ram_buf_wr			: std_logic;
 signal ram_buf_oe0		: std_logic;
 signal ram_buf_oe1		: std_logic;
+signal ram_vm_oe0			: std_logic;
+signal ram_vm_oe1			: std_logic;
 
 begin
 --------------------------------------------------------------------------------
@@ -295,6 +297,8 @@ video: mod_video
 		pFA,
 		pFB,
 		pFC,
+		ram_vm_oe0,
+		ram_vm_oe1,
 		ram_cen_v,
 		ram_lbn,
 		ram_ubn,
@@ -331,8 +335,6 @@ cpu: mod_cpu
 		ram_rdn,
 		ram_wrn,
 		MA,
-		cs_F4,
-		cs_F5,
 		snd,
 		ctrl_turbo_n,
 		pF8,
@@ -340,9 +342,10 @@ cpu: mod_cpu
 		pFB,
 		pFC,
 		ram_cen,
-		ram_buf_wr,
 		ram_buf_oe0,
 		ram_buf_oe1,
+		ram_vm_oe0,
+		ram_vm_oe1,
 		int50Hz,
 		irqSn,
 		irq1n,
@@ -362,7 +365,9 @@ pio : orion_pio
 		data,
 		rdn,
 		wrn,
-		cs_F5 & cs_F4,
+		blion,
+		iorqn,
+		mreqn,
 		PS2_CLK,
 		PS2_DAT
 	);
@@ -389,10 +394,10 @@ SLB <= ram_lbn;
 SCE <= ram_cen(0);
 SWE <= ram_wrn;
 
-SMD(7  downto 0) <= data when ((ram_buf_wr='0') and (ram_buf_oe0='0')) else (others => 'Z');
-SMD(15 downto 8) <= data when ((ram_buf_wr='0') and (ram_buf_oe1='0')) else (others => 'Z');
-data <= SMD(7  downto 0) when ((ram_buf_wr='1') and (ram_buf_oe0='0')) else (others => 'Z');
-data <= SMD(15 downto 8) when ((ram_buf_wr='1') and (ram_buf_oe1='0')) else (others => 'Z');
+SMD(7  downto 0) <= data when ((wrn='0') and (ram_buf_oe0='0')) else (others => 'Z');
+SMD(15 downto 8) <= data when ((wrn='0') and (ram_buf_oe1='0')) else (others => 'Z');
+data <= SMD(7  downto 0) when ((wrn='1') and (ram_buf_oe0='0')) else (others => 'Z');
+data <= SMD(15 downto 8) when ((wrn='1') and (ram_buf_oe1='0')) else (others => 'Z');
 
 blion <= '1';
 irqSn <= '1';

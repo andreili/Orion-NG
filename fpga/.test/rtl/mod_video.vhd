@@ -26,6 +26,8 @@ entity mod_video is
 		pFB			:	 IN std_logic;
 		pFC			:	 IN std_logic;
 		-- RAM dispatcher signal
+		ram_vm_oe0	:	 IN STD_LOGIC;
+		ram_vm_oe1	:	 IN STD_LOGIC;
 		ram_cen_v	:	 IN STD_LOGIC;
 		ram_lbn		:	 IN STD_LOGIC;
 		ram_ubn		:	 IN STD_LOGIC;
@@ -61,7 +63,7 @@ architecture rtl of mod_video is
 			clk_sel		:	 IN STD_LOGIC;
 			ctrl_turbo_n:	 IN STD_LOGIC;
 			x				:	 IN STD_LOGIC_VECTOR(9 downto 0);
-			col			:	 OUT STD_LOGIC;
+			col			:	 OUT STD_LOGIC_VECTOR(1 downto 0);
 			clk_sig		:	 OUT STD_LOGIC;
 			XRESN			:	 OUT STD_LOGIC;
 			BEn			:	 OUT STD_LOGIC;
@@ -120,7 +122,6 @@ architecture rtl of mod_video is
 
 -- video signals
 signal blank_n			: std_logic;
-signal column			: std_logic;
 signal vb				: std_logic_vector(1 downto 0);
 signal col				: std_logic_vector(1 downto 0);
 
@@ -138,7 +139,6 @@ signal vmem				: std_logic_vector (16 downto 0);
 signal vdata			: std_logic_vector (31 downto 0);
 
 signal mem_data		: std_logic_vector (31 downto 0);
-signal vmem_sel		: std_logic_vector (3 downto 0);
 
 -- video ports data
 signal SR16				: std_logic;
@@ -187,7 +187,7 @@ gx: gal_x
 		clk_sel,
 		ctrl_turbo_n,
 		x,
-		column,
+		col,
 		clk_sig,
 		XRESN,
 		BEn,
@@ -240,14 +240,11 @@ begin
 	end if;
 end process;
 
-col(0) <= column and (not x(2));
-col(1) <= column and x(2);
-
 vb(1) <= not video_bank(1);
 vb(0) <= not x(2);
 
-vmem_sel(0) <= (not ram_cen_v) and (not ram_lbn) and ram_ubn;
-vmem_sel(1) <= (not ram_cen_v) and ram_lbn and (not ram_ubn);
+--vmem_sel(0) <= (not ram_cen_v) and (not ram_lbn) and ram_ubn;
+--vmem_sel(1) <= (not ram_cen_v) and ram_lbn and (not ram_ubn);
 
 b0: ram2p
 	port map (
@@ -257,13 +254,13 @@ b0: ram2p
 		data_a		=> "00000000",
 		data_b		=> data,
 		rden_a		=> '1',
-		rden_b		=> ((not ram_rdn) and vmem_sel(0)),
+		rden_b		=> ((not ram_rdn) and (not ram_vm_oe0)),
 		wren_a		=> '0',
-		wren_b		=> ((not ram_wrn) and vmem_sel(0)),
+		wren_b		=> ((not ram_wrn) and (not ram_vm_oe0)),
 		q_a			=> vmem(7 downto 0),
 		q_b			=> mem_data(7 downto 0)
 	);
-data <= mem_data(7 downto 0) when (vmem_sel(0)='1') and (ram_rdn='0')
+data <= mem_data(7 downto 0) when (ram_vm_oe0='0') and (ram_wrn='1')
 	else (others => 'Z');
 
 b1: ram2p
@@ -274,13 +271,13 @@ b1: ram2p
 		data_a		=> "00000000",
 		data_b		=> data,
 		rden_a		=> '1',
-		rden_b		=> ((not ram_rdn) and vmem_sel(1)),
+		rden_b		=> ((not ram_rdn) and (not ram_vm_oe0)),
 		wren_a		=> '0',
-		wren_b		=> ((not ram_wrn) and vmem_sel(1)),
+		wren_b		=> ((not ram_wrn) and (not ram_vm_oe1)),
 		q_a			=> vmem(15 downto 8),
 		q_b			=> mem_data(15 downto 8)
 	);
-data <= mem_data(15 downto 8) when (vmem_sel(1)='1') and (ram_rdn='0')
+data <= mem_data(15 downto 8) when (ram_vm_oe1='0') and (ram_wrn='1')
 	else (others => 'Z');
 
 -- video registers
