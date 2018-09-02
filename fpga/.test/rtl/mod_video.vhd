@@ -182,7 +182,7 @@ cntx: cnt_sync
 
 gx: gal_x
 	port map (
-		clk_sel,
+		SR16,
 		wide_en,
 		clk_sel,
 		ctrl_turbo_n,

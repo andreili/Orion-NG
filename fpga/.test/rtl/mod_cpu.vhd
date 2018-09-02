@@ -33,8 +33,7 @@ entity mod_cpu is
 		pFB			:	 OUT std_logic;
 		pFC			:	 OUT std_logic;
 		ram_cen		:	 OUT std_logic_vector(3 downto 0);
-		ram_buf_oe0	:	 OUT std_logic;
-		ram_buf_oe1	:	 OUT std_logic;
+		ram_buf_oe	:	 OUT std_logic;
 		ram_vm_oe0	:	 OUT STD_LOGIC;
 		ram_vm_oe1	:	 OUT STD_LOGIC;
 		int50			:	 IN STD_LOGIC;
@@ -126,23 +125,22 @@ architecture rtl of mod_cpu is
 			wrn			:	 IN STD_LOGIC;
 			rfshn			:	 IN STD_LOGIC;
 			resetn		:	 IN STD_LOGIC;
+			waitn			:	 OUT STD_LOGIC;
 
 			snd			:	 OUT STD_LOGIC;
-			MA				:	 OUT STD_LOGIC_VECTOR(17 downto 14);
+			MA				:	 OUT STD_LOGIC_VECTOR(18 downto 14);
 			rom1_sel		:	 OUT STD_LOGIC;
 			rom2_sel		:	 OUT STD_LOGIC;
 			rom3_sel		:	 OUT STD_LOGIC;
+			turbo_n		:	 OUT STD_LOGIC;
 			rom2_addr	:	 OUT STD_LOGIC_VECTOR(18 downto 13);
 			addr_hi		:	 OUT STD_LOGIC_VECTOR(15 downto 14);
 
 			ram_wrn		:	 OUT STD_LOGIC;
 			ram_rdn		:	 OUT STD_LOGIC;
-			ram_lbn		:	 OUT STD_LOGIC;
-			ram_ubn		:	 OUT STD_LOGIC;
 			ram_cen_v	:	 OUT STD_LOGIC;
 			ram_cen		:	 OUT STD_LOGIC_VECTOR(3 downto 0);
-			ram_buf_oe0	:	 OUT STD_LOGIC;
-			ram_buf_oe1	:	 OUT STD_LOGIC;
+			ram_buf_oe	:	 OUT STD_LOGIC;
 			ram_vm_oe0	:	 OUT STD_LOGIC;
 			ram_vm_oe1	:	 OUT STD_LOGIC;
 			pF8			:	 OUT std_logic;
@@ -180,6 +178,7 @@ signal rfshn_in				: std_logic;
 signal wrn_in					: std_logic;
 signal rdn_in					: std_logic;
 signal m1n_in					: std_logic;
+signal MA						: std_logic_vector(18 downto 14);
 
 signal waitn				: std_logic;
 signal nmin					: std_logic;
@@ -188,7 +187,6 @@ signal busakn				: std_logic;
 
 begin
 
-waitn <= '1';
 nmin <= '1';
 
 Z80: T80a
@@ -268,23 +266,22 @@ ports: cpu_ports
 		wrn_in,
 		rfshn_in,
 		resetn,
+		waitn,
 		
 		snd,
-		ram_addr_hi,
+		MA,
 		rom1_sel,
 		rom2_sel,
 		rom3_sel,
+		ctrl_turbo_n,
 		rom2_addr,
 		addr_in(15 downto 14),
 		
 		ram_wrn,
 		ram_rdn,
-		ram_lbn,
-		ram_ubn,
 		ram_cen_v,
 		ram_cen,
-		ram_buf_oe0,
-		ram_buf_oe1,
+		ram_buf_oe,
 		ram_vm_oe0,
 		ram_vm_oe1,
 		pF8,
@@ -297,5 +294,9 @@ ports: cpu_ports
 		int50,
 		config
 	);
+
+ram_addr_hi <= MA(18) & MA(17) & MA(15 downto 14);
+ram_lbn <= MA(16);
+ram_ubn <= not MA(16);
 
 end rtl;

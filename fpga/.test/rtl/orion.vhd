@@ -144,8 +144,7 @@ architecture rtl of orion is
 			pFB			:	 OUT std_logic;
 			pFC			:	 OUT std_logic;
 			ram_cen		:	 OUT std_logic_vector(3 downto 0);
-			ram_buf_oe0	:	 OUT std_logic;
-			ram_buf_oe1	:	 OUT std_logic;
+			ram_buf_oe	:	 OUT std_logic;
 			ram_vm_oe0	:	 OUT std_logic;
 			ram_vm_oe1	:	 OUT std_logic;
 			int50			:	 IN STD_LOGIC;
@@ -224,8 +223,7 @@ signal pFC					: std_logic;
 signal ctrl_turbo_n		: std_logic;
 
 signal ram_cen				: std_logic_vector(3 downto 0);
-signal ram_buf_oe0		: std_logic;
-signal ram_buf_oe1		: std_logic;
+signal ram_buf_oe			: std_logic;
 signal ram_vm_oe0			: std_logic;
 signal ram_vm_oe1			: std_logic;
 
@@ -342,8 +340,7 @@ cpu: mod_cpu
 		pFB,
 		pFC,
 		ram_cen,
-		ram_buf_oe0,
-		ram_buf_oe1,
+		ram_buf_oe,
 		ram_vm_oe0,
 		ram_vm_oe1,
 		int50Hz,
@@ -394,10 +391,10 @@ SLB <= ram_lbn;
 SCE <= ram_cen(0);
 SWE <= ram_wrn;
 
-SMD(7  downto 0) <= data when ((wrn='0') and (ram_buf_oe0='0')) else (others => 'Z');
-SMD(15 downto 8) <= data when ((wrn='0') and (ram_buf_oe1='0')) else (others => 'Z');
-data <= SMD(7  downto 0) when ((wrn='1') and (ram_buf_oe0='0')) else (others => 'Z');
-data <= SMD(15 downto 8) when ((wrn='1') and (ram_buf_oe1='0')) else (others => 'Z');
+SMD(7  downto 0) <= data when ((wrn='0') and (ram_buf_oe='0') and (ram_lbn='0')) else (others => 'Z');
+SMD(15 downto 8) <= data when ((wrn='0') and (ram_buf_oe='0') and (ram_ubn='0')) else (others => 'Z');
+data <= SMD(7  downto 0) when ((wrn='1') and (ram_buf_oe='0') and (ram_lbn='0')) else (others => 'Z');
+data <= SMD(15 downto 8) when ((wrn='1') and (ram_buf_oe='0') and (ram_ubn='0')) else (others => 'Z');
 
 blion <= '1';
 irqSn <= '1';
