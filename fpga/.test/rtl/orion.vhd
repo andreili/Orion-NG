@@ -16,9 +16,8 @@ entity orion is
 		ZA				: out std_logic_vector(15 downto 0);
 		
 		sintn			: out std_logic;
-		sreq			: in std_logic;
-		sok			: in std_logic;
 		swrn			: in std_logic;
+		srdn			: in std_logic;
 		sreg_idx		: in std_logic_vector(2 downto 0);
 		sdata			: inout std_logic_vector(7 downto 0);
 		
@@ -180,9 +179,8 @@ architecture rtl of orion is
 			mreqn			: in  std_logic;
 		
 			sintn			: out std_logic;
-			sreq			: in std_logic;	-- request data to TM32
-			sok			: in std_logic;	-- data from STM32 is ready
 			swrn			: in std_logic;
+			srdn			: in std_logic;
 			sreg_idx		: in std_logic_vector(2 downto 0);
 			sdata			: inout std_logic_vector(7 downto 0)
 		);
@@ -378,9 +376,8 @@ pio : mod_pio
 		iorqn,
 		mreqn,
 		sintn,
-		sreq,
-		sok,
 		swrn,
+		srdn,
 		sreg_idx,
 		sdata
 	);
