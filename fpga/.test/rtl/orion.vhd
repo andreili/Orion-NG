@@ -15,6 +15,13 @@ entity orion is
 		
 		ZA				: out std_logic_vector(15 downto 0);
 		
+		sintn			: out std_logic;
+		sreq			: in std_logic;
+		sok			: in std_logic;
+		swrn			: in std_logic;
+		sreg_idx		: in std_logic_vector(2 downto 0);
+		sdata			: inout std_logic_vector(7 downto 0);
+		
 		SMA			: out std_logic_vector(17 downto 0);
 		SMD			: inout std_logic_vector(15 downto 0);
 		SOE			: out std_logic;
@@ -159,7 +166,7 @@ architecture rtl of orion is
 		);
 	end component;
 
-	component orion_pio is
+	component mod_pio is
 		port (
 			clk			: in  std_logic;	-- 25MHz
 			resetn		: in  std_logic;
@@ -171,8 +178,13 @@ architecture rtl of orion is
 			blion			: in  std_logic;
 			iorqn			: in  std_logic;
 			mreqn			: in  std_logic;
-			ps2_clk		: in  std_logic;
-			ps2_data		: in  std_logic
+		
+			sintn			: out std_logic;
+			sreq			: in std_logic;	-- request data to TM32
+			sok			: in std_logic;	-- data from STM32 is ready
+			swrn			: in std_logic;
+			sreg_idx		: in std_logic_vector(2 downto 0);
+			sdata			: inout std_logic_vector(7 downto 0)
 		);
 	end component;
 
@@ -354,7 +366,7 @@ cpu: mod_cpu
 		irq7n
 	);
 
-pio : orion_pio
+pio : mod_pio
 	port map (
 		clk_100MHz,
 		resetn,
@@ -365,8 +377,12 @@ pio : orion_pio
 		blion,
 		iorqn,
 		mreqn,
-		PS2_CLK,
-		PS2_DAT
+		sintn,
+		sreq,
+		sok,
+		swrn,
+		sreg_idx,
+		sdata
 	);
 
 VGA_R(7) <= R(0);

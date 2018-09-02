@@ -42,7 +42,7 @@
 # ========================
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 17.1.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "20:39:41  JANUARY 06, 2018"
-set_global_assignment -name LAST_QUARTUS_VERSION "16.1.2 Standard Edition"
+set_global_assignment -name LAST_QUARTUS_VERSION "17.0.1 Standard Edition"
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 
 # Pin & Location Assignments
@@ -1044,25 +1044,6 @@ set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[1] -t
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[23] -to sigs|gnd -section_id sigs
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=16384" -section_id sigs
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=16384" -section_id sigs
-set_global_assignment -name VHDL_FILE rtl/cnt_sync.vhd
-set_global_assignment -name QIP_FILE rtl/T80/T80.qip
-set_global_assignment -name VERILOG_FILE rtl/ps2_keyboard.v
-set_global_assignment -name VERILOG_FILE rtl/orionkeyboard.v
-set_global_assignment -name QIP_FILE rom_disk/rom_disk.qip
-set_global_assignment -name VHDL_FILE rtl/orion_pio.vhd
-set_global_assignment -name VHDL_FILE rtl/i8255.vhd
-set_global_assignment -name VHDL_FILE ../fpga_ports/rtl/cpu_ports.vhd
-set_global_assignment -name VERILOG_FILE rtl/debounce.v
-set_global_assignment -name QIP_FILE pll/orion_pll.qip
-set_global_assignment -name VHDL_FILE rtl/orion.vhd
-set_global_assignment -name QIP_FILE ROM1/rom1.qip
-set_global_assignment -name QIP_FILE ROM2/rom2.qip
-set_global_assignment -name QIP_FILE ram2p/ram2p.qip
-set_global_assignment -name VHDL_FILE rtl/mod_video.vhd
-set_global_assignment -name VHDL_FILE rtl/mod_cpu.vhd
-set_global_assignment -name VHDL_FILE rtl/gal_x.vhd
-set_global_assignment -name VHDL_FILE rtl/gal_y.vhd
-set_global_assignment -name VHDL_FILE rtl/gal_vout.vhd
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[17] -to sigs|vcc -section_id sigs
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[21] -to sigs|vcc -section_id sigs
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[10] -to sigs|gnd -section_id sigs
@@ -1182,6 +1163,25 @@ set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[16] -
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[24] -to sigs|vcc -section_id sigs
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[26] -to sigs|gnd -section_id sigs
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[29] -to sigs|gnd -section_id sigs
+set_global_assignment -name VHDL_FILE ../fpga_pio/rtl/mod_pio.vhd
+set_global_assignment -name VHDL_FILE rtl/cnt_sync.vhd
+set_global_assignment -name QIP_FILE rtl/T80/T80.qip
+set_global_assignment -name VERILOG_FILE rtl/ps2_keyboard.v
+set_global_assignment -name VERILOG_FILE rtl/orionkeyboard.v
+set_global_assignment -name QIP_FILE rom_disk/rom_disk.qip
+set_global_assignment -name VHDL_FILE rtl/i8255.vhd
+set_global_assignment -name VHDL_FILE ../fpga_ports/rtl/cpu_ports.vhd
+set_global_assignment -name VERILOG_FILE rtl/debounce.v
+set_global_assignment -name QIP_FILE pll/orion_pll.qip
+set_global_assignment -name VHDL_FILE rtl/orion.vhd
+set_global_assignment -name QIP_FILE ROM1/rom1.qip
+set_global_assignment -name QIP_FILE ROM2/rom2.qip
+set_global_assignment -name QIP_FILE ram2p/ram2p.qip
+set_global_assignment -name VHDL_FILE rtl/mod_video.vhd
+set_global_assignment -name VHDL_FILE rtl/mod_cpu.vhd
+set_global_assignment -name VHDL_FILE rtl/gal_x.vhd
+set_global_assignment -name VHDL_FILE rtl/gal_y.vhd
+set_global_assignment -name VHDL_FILE rtl/gal_vout.vhd
 set_global_assignment -name VHDL_FILE rtl/gav_int.vhd
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name SLD_FILE db/stp1_auto_stripped.stp
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
