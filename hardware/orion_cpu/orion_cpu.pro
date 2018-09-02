@@ -40,12 +40,4 @@ version=1
 LibDir=../../hardware
 [eeschema/libraries]
 LibName1=orion_cpu-rescue
-LibName2=orion
-LibName3=device
-LibName4=power
-LibName5=conn
-LibName6=Lattice
-LibName7=74xgxx
-LibName8=memory
-LibName9=Zilog
-LibName10=switches
+
