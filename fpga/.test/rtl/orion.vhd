@@ -13,8 +13,6 @@ entity orion is
 		
 		LEDR			: out std_logic_vector(9 downto 0);
 		
-		ZA				: out std_logic_vector(15 downto 0);
-		
 		sintn			: out std_logic;
 		swrn			: in std_logic;
 		srdn			: in std_logic;
@@ -394,8 +392,6 @@ VGA_B(5 downto 0) <= (others => B(0));
 VGA_CLK <= clk_50MHz;
 VGA_SYNC_N <= '0';
 VGA_BLANK_N <= '1';
-
-ZA <= addr;
 
 SMA <= MA & addr(13 downto 0);
 SOE <= ram_rdn;

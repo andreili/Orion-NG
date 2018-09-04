@@ -48,7 +48,6 @@ signal f4xx					: std_logic;
 signal fhxx					: std_logic;
 signal fhxx_sel			: std_logic;
 signal Ox_sel				: std_logic;
-signal pm					: std_logic;
 signal pmF4					: std_logic;
 signal pFB					: std_logic;
 signal pmF5					: std_logic;
@@ -60,6 +59,8 @@ signal z80_port_en		: std_logic;
 signal p0A_wr				: std_logic;
 signal z80_full_RAM		: std_logic;
 
+signal data_in				: std_logic_vector(7 downto 0);
+
 signal kbd_col				: std_logic_vector(10 downto 0);
 signal kbd_row				: std_logic_vector(7 downto 0);
 signal kbd_mg_out			: std_logic;
@@ -68,6 +69,8 @@ signal rd_kbd_row			: std_logic;
 signal wr_kbd_col0		: std_logic;
 signal wr_kbd_col1		: std_logic;
 signal rd_kbd_mg			: std_logic;
+
+signal rd_other			: std_logic;
 
 signal sintn_in			: std_logic;
 signal stm_int_req		: std_logic;
@@ -80,7 +83,6 @@ signal stm_rreg_3			: std_logic_vector(7 downto 0);
 signal stm_rreg_4			: std_logic_vector(7 downto 0);
 signal stm_rreg_5			: std_logic_vector(7 downto 0);
 signal stm_rreg_6			: std_logic_vector(7 downto 0);
-signal stm_rreg_7			: std_logic_vector(7 downto 0);
 
 signal stm_wreg_0			: std_logic_vector(7 downto 0);
 signal stm_wreg_1			: std_logic_vector(7 downto 0);
@@ -89,7 +91,6 @@ signal stm_wreg_3			: std_logic_vector(7 downto 0);
 signal stm_wreg_4			: std_logic_vector(7 downto 0);
 signal stm_wreg_5			: std_logic_vector(7 downto 0);
 signal stm_wreg_6			: std_logic_vector(7 downto 0);
-signal stm_wreg_7			: std_logic_vector(7 downto 0);
 
 begin
 
@@ -99,7 +100,6 @@ f4xx <= fxxx and (not addr(11)) and addr(10);
 fhxx <= iorqn or (not (blion and addr(3) and addr(4) and addr(5) and addr(6)));
 fhxx_sel <= addr(7) and (not (wrn)) and (not fhxx);
 Ox_sel <= (blion and (not (addr(5) or addr(6)))) and (not addr(7)) and (not iorqn);
-pm <= addr(11) and fxxx and (not (mreqn or wrn));
 pmF4 <= f4xx and    addr(10)  and (not addr(9)) and (not addr(8));
 pmF5 <= f4xx and    addr(10)  and (not addr(9)) and      addr(8);
 pFB  <= fhxx_sel and      addr(0)  and      addr(1)  and (not addr(2));
@@ -129,6 +129,9 @@ begin
 	end if;
 end process;
 
+-- TODO
+rd_other <= pmF5 and (not rdn);
+
 -- keyboard
 rd_kbd_row  <= cs_F4 and (not rdn) and (not addr(1)) and (not addr(0));
 wr_kbd_col0 <= cs_F4 and (not wrn) and (not addr(1)) and      addr(0);
@@ -137,6 +140,7 @@ rd_kbd_mg   <= cs_F4 and (not rdn) and      addr(1)  and (not addr(0));
 
 data <= kbd_row  when (rd_kbd_row ='1') else (others => 'Z');
 data(7 downto 4) <= kbd_mg_read when (rd_kbd_mg  ='1') else (others => 'Z');
+data <= data_in when (rd_other='1') else (others => 'Z');
 
 col0: process (wr_kbd_col0)
 begin
@@ -159,7 +163,6 @@ sint_pr: process (resetn, srdn, stm_int_req)
 begin
 	if (resetn = '0') or (srdn = '1') then
 		sintn_in <= '1';
-		stm_int_vector <= (others => '0');
 	elsif (rising_edge(stm_int_req)) then
 		sintn_in <= '0';
 		stm_int_vector(1 downto 0) <= addr(1 downto 0);
@@ -176,7 +179,7 @@ sdata <= stm_int_vector when ((srdn='1') and (swrn='1'))
 	 else stm_rreg_4 when (srdn='0') and (sreg_idx="100")
 	 else stm_rreg_5 when (srdn='0') and (sreg_idx="101")
 	 else stm_rreg_6 when (srdn='0') and (sreg_idx="110")
-	 else stm_rreg_7 when (srdn='0') and (sreg_idx="111")
+	 else data when (srdn='0') and (sreg_idx="111")
 	 else (others => 'Z');
 
 stm_rreg_0 <= kbd_col(7 downto 0);
@@ -193,7 +196,6 @@ begin
 		stm_wreg_4 <= (others => '0');
 		stm_wreg_5 <= (others => '0');
 		stm_wreg_6 <= (others => '0');
-		stm_wreg_7 <= (others => '0');
 	elsif (rising_edge(swrn)) then
 		case sreg_idx is
 			when "000" =>	stm_wreg_0 <= sdata;
@@ -203,7 +205,7 @@ begin
 			when "100" =>	stm_wreg_4 <= sdata;
 			when "101" =>	stm_wreg_5 <= sdata;
 			when "110" =>	stm_wreg_6 <= sdata;
-			when "111" =>	stm_wreg_7 <= sdata;
+			when "111" =>	data_in <= sdata;
 		end case;
 	end if;
 end process;

@@ -230,7 +230,7 @@ module  orion_pll
 		orion_pll_altera_pll_altera_pll_i_1098.number_of_clocks = 2,
 		orion_pll_altera_pll_altera_pll_i_1098.operation_mode = "direct",
 		orion_pll_altera_pll_altera_pll_i_1098.output_clock_frequency0 = "25.000000 MHz",
-		orion_pll_altera_pll_altera_pll_i_1098.output_clock_frequency1 = "100.000000 MHz",
+		orion_pll_altera_pll_altera_pll_i_1098.output_clock_frequency1 = "50.000000 MHz",
 		orion_pll_altera_pll_altera_pll_i_1098.output_clock_frequency10 = "0 MHz",
 		orion_pll_altera_pll_altera_pll_i_1098.output_clock_frequency11 = "0 MHz",
 		orion_pll_altera_pll_altera_pll_i_1098.output_clock_frequency12 = "0 MHz",
