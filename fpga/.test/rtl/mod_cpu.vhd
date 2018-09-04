@@ -192,7 +192,7 @@ nmin <= '1';
 Z80: T80a
 	port map (
 		resetn,
-		clk,
+		clk_sig,
 		waitn,
 		intn,
 		nmin,
