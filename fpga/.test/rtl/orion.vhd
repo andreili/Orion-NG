@@ -5,7 +5,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
 entity orion is
-	port (
+	port ( 
 		CLOCK_50		: in  std_logic;
 		
 		SW				: in std_logic_vector(9 downto 0);
@@ -16,8 +16,12 @@ entity orion is
 		sintn			: out std_logic;
 		swrn			: in std_logic;
 		srdn			: in std_logic;
+		sok			: in std_logic;
 		sreg_idx		: in std_logic_vector(2 downto 0);
-		sdata			: inout std_logic_vector(7 downto 0);
+		sdata			: inout std_logic_vector(10 downto 0);
+		
+		mg_in			: in std_logic;
+		mg_out		: out std_logic;
 		
 		SMA			: out std_logic_vector(17 downto 0);
 		SMD			: inout std_logic_vector(15 downto 0);
@@ -176,12 +180,22 @@ architecture rtl of orion is
 			blion			: in  std_logic;
 			iorqn			: in  std_logic;
 			mreqn			: in  std_logic;
+			waitn			: out std_logic;
 		
+			btn_cc		: in std_logic;
+			btn_uc		: in std_logic;
+			btn_rl		: in std_logic;
+			
+			mg_in			: in  std_logic;
+			mg_out		: out std_logic;
+			led_rl		: out std_logic;
+			
 			sintn			: out std_logic;
 			swrn			: in std_logic;
 			srdn			: in std_logic;
+			sok			: in std_logic;
 			sreg_idx		: in std_logic_vector(2 downto 0);
-			sdata			: inout std_logic_vector(7 downto 0)
+			sdata			: inout std_logic_vector(10 downto 0)
 		);
 	end component;
 
@@ -251,7 +265,7 @@ LEDR(5) <= data(5);
 LEDR(6) <= data(6);
 LEDR(7) <= data(7);
 LEDR(8) <= resetn;
-LEDR(9) <= '0';
+--LEDR(9) <= '0';
 HEX0 <= (others => '1');
 HEX1 <= (others => '1');
 HEX2 <= (others => '1');
@@ -376,9 +390,17 @@ pio : mod_pio
 		blion,
 		iorqn,
 		mreqn,
+		waitn,
+		KEY(3),
+		KEY(2),
+		KEY(1),
+		mg_in,
+		mg_out,
+		LEDR(9),
 		sintn,
 		swrn,
 		srdn,
+		sok,
 		sreg_idx,
 		sdata
 	);

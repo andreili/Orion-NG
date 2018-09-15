@@ -16,30 +16,50 @@ entity mod_pio is
 		blion			: in  std_logic;
 		iorqn			: in  std_logic;
 		mreqn			: in  std_logic;
+		waitn			: out std_logic;
+		
+		btn_cc		: in std_logic;
+		btn_uc		: in std_logic;
+		btn_rl		: in std_logic;
+		
+		mg_in			: in  std_logic;
+		mg_out		: out std_logic;
+		led_rl		: out std_logic;
+
+		romd_strobe	: out std_logic;
+		romd_csn		: out std_logic;
+		romd_idx		: out std_logic_vector(3 downto 0);
+		romd_bus		: inout std_logic_vector(7 downto 0);
 		
 		sintn			: out std_logic;
 		swrn			: in std_logic;
 		srdn			: in std_logic;
+		sok			: in std_logic;
 		sreg_idx		: in std_logic_vector(2 downto 0);
-		sdata			: inout std_logic_vector(7 downto 0)
+		sdata			: inout std_logic_vector(10 downto 0)
 	);
 end entity;
 
 architecture rtl of mod_pio is
-	
-	component i8255
+
+	component vv55_emu is
 		port (
-			clk	: in    std_logic;
-			dbus	: inout std_logic_vector(7 downto 0);
-			addr	: in    std_logic_vector(1 downto 0);
-			rd_n	: in    std_logic;
-			wr_n	: in    std_logic;
-			cs_n	: in    std_logic;
-			res	: in    std_logic;
+			clk			: in  std_logic;
+			resetn		: in  std_logic;
+
+			addr			: in  std_logic_vector(1 downto 0);
+			data			: inout std_logic_vector(7 downto 0);
+			rdn			: in  std_logic;
+			wrn			: in  std_logic;
+			cs				: in  std_logic;
 			
-			PA		: inout std_logic_vector(7 downto 0);
-			PB		: inout std_logic_vector(7 downto 0);
-			PC		: inout std_logic_vector(7 downto 0)
+			mg_in			: in  std_logic;
+			mg_out		: out std_logic;
+		
+			row_in		: out std_logic;
+			col_in		: out std_logic;
+			kbd_rd_row	: inout std_logic_vector(7 downto 0);
+			kbd_rd_col	: inout std_logic_vector(11 downto 0)
 		);
 	end component;
 
@@ -54,43 +74,29 @@ signal pmF5					: std_logic;
 signal p08					: std_logic;
 signal p18					: std_logic;
 signal cs_F4				: std_logic;
+signal cs_F5				: std_logic;
 signal ctrl_o128			: std_logic;
 signal z80_port_en		: std_logic;
 signal p0A_wr				: std_logic;
 signal z80_full_RAM		: std_logic;
 
-signal data_in				: std_logic_vector(7 downto 0);
-
-signal kbd_col				: std_logic_vector(10 downto 0);
-signal kbd_row				: std_logic_vector(7 downto 0);
-signal kbd_mg_out			: std_logic;
-signal kbd_mg_read		: std_logic_vector(3 downto 0);
-signal rd_kbd_row			: std_logic;
-signal wr_kbd_col0		: std_logic;
-signal wr_kbd_col1		: std_logic;
-signal rd_kbd_mg			: std_logic;
-
-signal rd_other			: std_logic;
-
 signal sintn_in			: std_logic;
 signal stm_int_req		: std_logic;
 signal stm_int_vector	: std_logic_vector(7 downto 0);
 
-signal stm_rreg_0			: std_logic_vector(7 downto 0);
-signal stm_rreg_1			: std_logic_vector(7 downto 0);
-signal stm_rreg_2			: std_logic_vector(7 downto 0);
-signal stm_rreg_3			: std_logic_vector(7 downto 0);
-signal stm_rreg_4			: std_logic_vector(7 downto 0);
-signal stm_rreg_5			: std_logic_vector(7 downto 0);
-signal stm_rreg_6			: std_logic_vector(7 downto 0);
+signal vv_reg_0			: std_logic_vector(7 downto 0);
+signal vv_reg_1			: std_logic_vector(7 downto 0);
+signal vv_reg_2			: std_logic_vector(7 downto 0);
+signal vv_reg_3			: std_logic_vector(7 downto 0);
 
-signal stm_wreg_0			: std_logic_vector(7 downto 0);
-signal stm_wreg_1			: std_logic_vector(7 downto 0);
-signal stm_wreg_2			: std_logic_vector(7 downto 0);
-signal stm_wreg_3			: std_logic_vector(7 downto 0);
-signal stm_wreg_4			: std_logic_vector(7 downto 0);
-signal stm_wreg_5			: std_logic_vector(7 downto 0);
-signal stm_wreg_6			: std_logic_vector(7 downto 0);
+signal kbd_row_0			: std_logic_vector(7 downto 0);
+signal kbd_row_1			: std_logic_vector(7 downto 0);
+signal kbd_row_2			: std_logic_vector(7 downto 0);
+signal kbd_row_3			: std_logic_vector(7 downto 0);
+signal kbd_row_4			: std_logic_vector(7 downto 0);
+signal kbd_row_5			: std_logic_vector(7 downto 0);
+signal kbd_row_6			: std_logic_vector(7 downto 0);
+signal kbd_row_7			: std_logic_vector(7 downto 0);
 
 begin
 
@@ -129,88 +135,184 @@ begin
 	end if;
 end process;
 
--- TODO
-rd_other <= pmF5 and (not rdn);
-
--- keyboard
-rd_kbd_row  <= cs_F4 and (not rdn) and (not addr(1)) and (not addr(0));
-wr_kbd_col0 <= cs_F4 and (not wrn) and (not addr(1)) and      addr(0);
-wr_kbd_col1 <= cs_F4 and (not wrn) and      addr(1)  and (not addr(0));
-rd_kbd_mg   <= cs_F4 and (not rdn) and      addr(1)  and (not addr(0));
-
-data <= kbd_row  when (rd_kbd_row ='1') else (others => 'Z');
-data(7 downto 4) <= kbd_mg_read when (rd_kbd_mg  ='1') else (others => 'Z');
-data <= data_in when (rd_other='1') else (others => 'Z');
-
-col0: process (wr_kbd_col0)
-begin
-	if (rising_edge(wr_kbd_col0)) then
-		kbd_col(7 downto 0) <= data;
-	end if;
-end process;
-
-col1: process (wr_kbd_col1)
-begin
-	if (rising_edge(wr_kbd_col1)) then
-		kbd_col(10 downto 8) <= data(2 downto 0);
-		kbd_mg_out <= data(4);
-	end if;
-end process;
+-- registers processing
 
 --STM32 signals
-stm_int_req <= wr_kbd_col0 or wr_kbd_col1;
+stm_int_req <= cs_F4 and ((not wrn) or (not rdn));
+
 sint_pr: process (resetn, srdn, stm_int_req)
 begin
-	if (resetn = '0') or (srdn = '1') then
+	if (resetn = '0') or (srdn = '0') then
 		sintn_in <= '1';
 	elsif (rising_edge(stm_int_req)) then
-		sintn_in <= '0';
+		if ((srdn='1') and (swrn='1')) then
+			sintn_in <= '0';
+		end if;
 		stm_int_vector(1 downto 0) <= addr(1 downto 0);
-		stm_int_vector(2) <= '1';
+		stm_int_vector(2) <= cs_F4;
+		stm_int_vector(7) <= wrn;
 	end if;
 end process;
 sintn <= sintn_in;
 
-sdata <= stm_int_vector when ((srdn='1') and (swrn='1'))
-	 else stm_rreg_0 when (srdn='0') and (sreg_idx="000")
-	 else stm_rreg_1 when (srdn='0') and (sreg_idx="001")
-	 else stm_rreg_2 when (srdn='0') and (sreg_idx="010")
-	 else stm_rreg_3 when (srdn='0') and (sreg_idx="011")
-	 else stm_rreg_4 when (srdn='0') and (sreg_idx="100")
-	 else stm_rreg_5 when (srdn='0') and (sreg_idx="101")
-	 else stm_rreg_6 when (srdn='0') and (sreg_idx="110")
-	 else data when (srdn='0') and (sreg_idx="111")
+sdata <= "000" & stm_int_vector when ((swrn='1') and (srdn='1'))
+	 --else "000" & data when ((srdn='0') and (sreg_idx="111"))
 	 else (others => 'Z');
 
-stm_rreg_0 <= kbd_col(7 downto 0);
-stm_rreg_1(3 downto 0) <= kbd_mg_out & kbd_col(10 downto 8);
-
--- fast registers
-fregs: process (resetn, swrn)
+process (swrn)
 begin
-	if (resetn = '0') then
-		stm_wreg_0 <= (others => '0');
-		stm_wreg_1 <= (others => '0');
-		stm_wreg_2 <= (others => '0');
-		stm_wreg_3 <= (others => '0');
-		stm_wreg_4 <= (others => '0');
-		stm_wreg_5 <= (others => '0');
-		stm_wreg_6 <= (others => '0');
-	elsif (rising_edge(swrn)) then
+	if (rising_edge(swrn)) then
 		case sreg_idx is
-			when "000" =>	stm_wreg_0 <= sdata;
-			when "001" =>	stm_wreg_1 <= sdata;
-			when "010" =>	stm_wreg_2 <= sdata;
-			when "011" =>	stm_wreg_3 <= sdata;
-			when "100" =>	stm_wreg_4 <= sdata;
-			when "101" =>	stm_wreg_5 <= sdata;
-			when "110" =>	stm_wreg_6 <= sdata;
-			when "111" =>	data_in <= sdata;
+			when "000" => kbd_row_0 <= sdata(7 downto 0);
+			when "001" => kbd_row_1 <= sdata(7 downto 0);
+			when "010" => kbd_row_2 <= sdata(7 downto 0);
+			when "011" => kbd_row_3 <= sdata(7 downto 0);
+			when "100" => kbd_row_4 <= sdata(7 downto 0);
+			when "101" => kbd_row_5 <= sdata(7 downto 0);
+			when "110" => kbd_row_6 <= sdata(7 downto 0);
+			when "111" => kbd_row_7 <= sdata(7 downto 0);
+			when others => NULL;
 		end case;
 	end if;
 end process;
 
-kbd_row <= stm_wreg_0;
-kbd_mg_read <= stm_wreg_1(3 downto 0);
+-- CPU /WAIT signal generation
+/*process (clk)
+begin
+	if (sok = '1') then
+		waitn <= '1';
+	elsif (rising_edge(clk)) then
+		if (stm_int_req = '1') then
+			waitn <= '0';
+		end if;
+	end if;
+end process;*/
 
+waitn <= '1';
+
+-- VV55
+process (clk)
+begin
+	if (rising_edge(clk)) then
+		if ((cs_F4 = '1') and (wrn = '0') and (addr(1 downto 0) = "00")) then
+			vv_reg_0 <= data;
+		end if;
+	end if;
+end process;
+
+process (clk)
+begin
+	if (rising_edge(clk)) then
+		if ((cs_F4 = '1') and (wrn = '0') and (addr(1 downto 0) = "11") and (vv_reg_3(0) = '0') and (data(7) = '0') and (data(3) = '0')) then
+			case data(2 downto 1) is
+				when "00" => 	vv_reg_2(0) <= data(0);
+				when "01" => 	vv_reg_2(1) <= data(0);
+				when "10" => 	vv_reg_2(2) <= data(0);
+				when "11" => 	vv_reg_2(3) <= data(0);
+			end case;
+		elsif ((cs_F4 = '1') and (wrn = '0') and (addr(1 downto 0) = "10") and (vv_reg_3(0) = '0')) then
+			vv_reg_2(3 downto 0) <= data(3 downto 0);
+		end if;
+	end if;
+end process;
+
+process (resetn, clk)
+begin
+	if (resetn = '0') then
+		vv_reg_3 <= X"9B";
+	elsif (rising_edge(clk)) then
+		if ((cs_F4 = '1') and (wrn = '0') and (addr(1 downto 0) = "11") and (data(7) = '1')) then
+			vv_reg_3 <= data;
+		end if;
+	end if;
+end process;
+
+data <= vv_reg_1 when ((cs_F4 = '1') and (rdn = '0') and (addr(1 downto 0) = "01"))
+	else vv_reg_2 when ((cs_F4 = '1') and (rdn = '0') and (addr(1 downto 0) = "10"))
+	--else sdata(7 downto 0) when ((swrn='0') and (sreg_idx="111"))
+	else romd_bus when ((pmF5='1') and (rdn='0') and (addr(1) = '1') and (addr(0) = '0'))
+	else (others => 'Z');
+
+mg_out <= vv_reg_2(0);
+led_rl <= vv_reg_2(3);
+vv_reg_2(4) <= mg_in;
+vv_reg_2(5) <= btn_cc;
+vv_reg_2(6) <= btn_uc;
+vv_reg_2(7) <= btn_rl;
+
+-- matrix
+vv_reg_1(0) <= (kbd_row_0(0) or vv_reg_0(0)) and
+					(kbd_row_1(0) or vv_reg_0(1)) and
+					(kbd_row_2(0) or vv_reg_0(2)) and
+					(kbd_row_3(0) or vv_reg_0(3)) and
+					(kbd_row_4(0) or vv_reg_0(4)) and
+					(kbd_row_5(0) or vv_reg_0(5)) and
+					(kbd_row_6(0) or vv_reg_0(6)) and
+					(kbd_row_7(0) or vv_reg_0(7));
+vv_reg_1(1) <= (kbd_row_0(1) or vv_reg_0(0)) and
+					(kbd_row_1(1) or vv_reg_0(1)) and
+					(kbd_row_2(1) or vv_reg_0(2)) and
+					(kbd_row_3(1) or vv_reg_0(3)) and
+					(kbd_row_4(1) or vv_reg_0(4)) and
+					(kbd_row_5(1) or vv_reg_0(5)) and
+					(kbd_row_6(1) or vv_reg_0(6)) and
+					(kbd_row_7(1) or vv_reg_0(7));
+vv_reg_1(2) <= (kbd_row_0(2) or vv_reg_0(0)) and
+					(kbd_row_1(2) or vv_reg_0(1)) and
+					(kbd_row_2(2) or vv_reg_0(2)) and
+					(kbd_row_3(2) or vv_reg_0(3)) and
+					(kbd_row_4(2) or vv_reg_0(4)) and
+					(kbd_row_5(2) or vv_reg_0(5)) and
+					(kbd_row_6(2) or vv_reg_0(6)) and
+					(kbd_row_7(2) or vv_reg_0(7));
+vv_reg_1(3) <= (kbd_row_0(3) or vv_reg_0(0)) and
+					(kbd_row_1(3) or vv_reg_0(1)) and
+					(kbd_row_2(3) or vv_reg_0(2)) and
+					(kbd_row_3(3) or vv_reg_0(3)) and
+					(kbd_row_4(3) or vv_reg_0(4)) and
+					(kbd_row_5(3) or vv_reg_0(5)) and
+					(kbd_row_6(3) or vv_reg_0(6)) and
+					(kbd_row_7(3) or vv_reg_0(7));
+vv_reg_1(4) <= (kbd_row_0(4) or vv_reg_0(0)) and
+					(kbd_row_1(4) or vv_reg_0(1)) and
+					(kbd_row_2(4) or vv_reg_0(2)) and
+					(kbd_row_3(4) or vv_reg_0(3)) and
+					(kbd_row_4(4) or vv_reg_0(4)) and
+					(kbd_row_5(4) or vv_reg_0(5)) and
+					(kbd_row_6(4) or vv_reg_0(6)) and
+					(kbd_row_7(4) or vv_reg_0(7));
+vv_reg_1(5) <= (kbd_row_0(5) or vv_reg_0(0)) and
+					(kbd_row_1(5) or vv_reg_0(1)) and
+					(kbd_row_2(5) or vv_reg_0(2)) and
+					(kbd_row_3(5) or vv_reg_0(3)) and
+					(kbd_row_4(5) or vv_reg_0(4)) and
+					(kbd_row_5(5) or vv_reg_0(5)) and
+					(kbd_row_6(5) or vv_reg_0(6)) and
+					(kbd_row_7(5) or vv_reg_0(7));
+vv_reg_1(6) <= (kbd_row_0(6) or vv_reg_0(0)) and
+					(kbd_row_1(6) or vv_reg_0(1)) and
+					(kbd_row_2(6) or vv_reg_0(2)) and
+					(kbd_row_3(6) or vv_reg_0(3)) and
+					(kbd_row_4(6) or vv_reg_0(4)) and
+					(kbd_row_5(6) or vv_reg_0(5)) and
+					(kbd_row_6(6) or vv_reg_0(6)) and
+					(kbd_row_7(6) or vv_reg_0(7));
+vv_reg_1(7) <= (kbd_row_0(7) or vv_reg_0(0)) and
+					(kbd_row_1(7) or vv_reg_0(1)) and
+					(kbd_row_2(7) or vv_reg_0(2)) and
+					(kbd_row_3(7) or vv_reg_0(3)) and
+					(kbd_row_4(7) or vv_reg_0(4)) and
+					(kbd_row_5(7) or vv_reg_0(5)) and
+					(kbd_row_6(7) or vv_reg_0(6)) and
+					(kbd_row_7(7) or vv_reg_0(7));
+
+-- ROM-disk
+romd_idx <= "1110" when ((pmF5='1') and (wrn='0') and (addr(1) = '0') and (addr(0) = '0'))	-- A0-A7
+		 else "1101" when ((pmF5='1') and (wrn='0') and (addr(1) = '0') and (addr(0) = '1'))	-- A8-A15
+		 else "1111";
+romd_csn <= '0' when ((pmF5='1') and (rdn='0') and (addr(1) = '1') and (addr(0) = '0'))
+		 else '1';
+romd_bus <= data when ((pmF5='1') and (wrn='0') and (addr(1) = '0'))
+		 else (others => 'Z');
+			
 end rtl;
