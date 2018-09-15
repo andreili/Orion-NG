@@ -271,7 +271,7 @@ b1: ram2p
 		data_a		=> "00000000",
 		data_b		=> data,
 		rden_a		=> '1',
-		rden_b		=> ((not ram_rdn) and (not ram_vm_oe0)),
+		rden_b		=> ((not ram_rdn) and (not ram_vm_oe1)),
 		wren_a		=> '0',
 		wren_b		=> ((not ram_wrn) and (not ram_vm_oe1)),
 		q_a			=> vmem(15 downto 8),
