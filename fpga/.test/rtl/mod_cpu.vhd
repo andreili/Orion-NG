@@ -11,6 +11,7 @@ entity mod_cpu is
 		clk_sig		:	 IN STD_LOGIC;
 		resetn		:	 IN STD_LOGIC;
 		blion			:	 IN STD_LOGIC;
+		waitn			:	 IN STD_LOGIC;
 		addr			:	 OUT STD_LOGIC_VECTOR(15 downto 0);
 		data			:	 INOUT STD_LOGIC_VECTOR(7 downto 0);
 		iorqn			:	 OUT STD_LOGIC;
@@ -52,7 +53,7 @@ architecture rtl of mod_cpu is
  
 	component T80a is
 		generic(
-			Mode : integer := 0	-- 0 => Z80, 1 => Fast Z80, 2 => 8080, 3 => GB
+			Mode : integer := 1	-- 0 => Z80, 1 => Fast Z80, 2 => 8080, 3 => GB
 		);
 		port(
 			RESET_n	: in std_logic;
@@ -70,7 +71,8 @@ architecture rtl of mod_cpu is
 			HALT_n	: out std_logic;
 			BUSAK_n	: out std_logic;
 			A			: out std_logic_vector(15 downto 0);
-			D			: inout std_logic_vector(7 downto 0)
+			D			: inout std_logic_vector(7 downto 0);
+			RestorePC_n : in std_logic
 		);
 	end component;
 
@@ -180,7 +182,8 @@ signal rdn_in					: std_logic;
 signal m1n_in					: std_logic;
 signal MA						: std_logic_vector(18 downto 14);
 
-signal waitn				: std_logic;
+signal waitn_in			: std_logic;
+signal waitn_md			: std_logic;
 signal nmin					: std_logic;
 signal haltn				: std_logic;
 signal busakn				: std_logic;
@@ -189,11 +192,13 @@ begin
 
 nmin <= '1';
 
+waitn_in <= waitn_md and waitn;
+
 Z80: T80a
 	port map (
 		resetn,
 		clk_sig,
-		waitn,
+		waitn_in,
 		intn,
 		nmin,
 		'1',
@@ -206,7 +211,8 @@ Z80: T80a
 		haltn,
 		busakn,
 		ZA,
-		data
+		data,
+		'1'
 	);
 
 r1: rom1
@@ -266,7 +272,7 @@ ports: cpu_ports
 		wrn_in,
 		rfshn_in,
 		resetn,
-		waitn,
+		waitn_md,
 		
 		snd,
 		MA,

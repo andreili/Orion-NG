@@ -108,7 +108,14 @@ entity T80 is
 		TS			: out std_logic_vector(2 downto 0);
 		IntCycle_n	: out std_logic;
 		IntE		: out std_logic;
-		Stop		: out std_logic
+		Stop		: out std_logic;
+		
+		SavePC      : out std_logic_vector(15 downto 0);
+		SaveINT     : out std_logic_vector(7 downto 0);
+		RestorePC   : in std_logic_vector(15 downto 0);
+		RestoreINT  : in std_logic_vector(7 downto 0);
+		
+		RestorePC_n : in std_logic
 	);
 end T80;
 
@@ -342,11 +349,11 @@ begin
 		DI_Reg when Save_ALU_r = '0' else
 		ALU_Q;
 
-	process (RESET_n, CLK_n)
+	process (RESET_n, RestorePC_n, CLK_n, RestorePC, RestoreInt)
 	begin
 		if RESET_n = '0' then
-			PC <= (others => '0');  -- Program Counter
-			A <= (others => '0');
+			PC <= "0000000000000000";  -- Program Counter
+			A <= "0000000000000000";
 			TmpAddr <= (others => '0');
 			IR <= "00000000";
 			ISet <= "00";
@@ -374,6 +381,11 @@ begin
 			PreserveC_r <= '0';
 			XY_Ind <= '0';
 
+		elsif RestorePC_n = '0' then
+			PC <= unsigned( RestorePC );
+			A <= RestorePC;
+			IStatus <= RestoreInt(1 downto 0);
+			
 		elsif CLK_n'event and CLK_n = '1' then
 
 			if ClkEn = '1' then
@@ -604,9 +616,25 @@ begin
 					when "00" =>
 						ACC <= I;
 						F(Flag_P) <= IntE_FF2;
+						F(Flag_S) <= I(7);
+						
+						if I = x"00" then 
+							F(Flag_Z) <= '1';
+						else
+							F(Flag_Z) <= '0';
+						end if;
+
 					when "01" =>
 						ACC <= std_logic_vector(R);
 						F(Flag_P) <= IntE_FF2;
+						F(Flag_S) <= R(7);
+						
+						if R = x"00" then 
+							F(Flag_Z) <= '1';
+						else
+							F(Flag_Z) <= '0';
+						end if;
+						
 					when "10" =>
 						I <= ACC;
 					when others =>
@@ -746,10 +774,10 @@ begin
 
 	RegAddrA <=
 			-- 16 bit increment/decrement
-			Alternate & IncDec_16(1 downto 0) when (TState = 2 or
-				(TState = 3 and MCycle = "001" and IncDec_16(2) = '1')) and XY_State = "00" else
 			XY_State(1) & "11" when (TState = 2 or
-				(TState = 3 and MCycle = "001" and IncDec_16(2) = '1')) and IncDec_16(1 downto 0) = "10" else
+				(TState = 3 and MCycle = "001" and IncDec_16(2) = '1')) and IncDec_16(1 downto 0) = "10" and XY_State /= "00" else
+			Alternate & IncDec_16(1 downto 0) when (TState = 2 or
+				(TState = 3 and MCycle = "001" and IncDec_16(2) = '1')) else
 			-- EX HL,DL
 			Alternate & "10" when ExchangeDH = '1' and TState = 3 else
 			Alternate & "01" when ExchangeDH = '1' and TState = 4 else
@@ -926,6 +954,10 @@ begin
 	IORQ <= IORQ_i;
 	Stop <= I_DJNZ;
 
+	SavePC <= std_logic_vector( PC );
+	SaveINT <= "0000" & IntE_FF2 & IntE_FF1 & IStatus when MCycle = "001" and TState = "001" and Prefix = "00" and IntCycle = '0' and NMICycle = '0' else
+			"1111" & IntE_FF2 & IntE_FF1 & IStatus;	
+	
 -------------------------------------------------------------------------
 --
 -- Syncronise inputs
@@ -958,7 +990,7 @@ begin
 -- Main state machine
 --
 -------------------------------------------------------------------------
-	process (RESET_n, CLK_n)
+	process (RESET_n, RestorePC_n, CLK_n, RestoreInt)
 	begin
 		if RESET_n = '0' then
 			MCycle <= "001";
@@ -974,6 +1006,22 @@ begin
 			Auto_Wait_t1 <= '0';
 			Auto_Wait_t2 <= '0';
 			M1_n <= '1';
+		
+		elsif RestorePC_n = '0' then
+			MCycle <= "001";
+			TState <= "001";
+			NMICycle <= '0';
+			IntCycle <= '0';
+			IntE_FF1 <= RestoreINT(2);
+			IntE_FF2 <= RestoreINT(3);
+
+			Pre_XY_F_M <= "000";
+			Halt_FF <= '0';
+			BusAck <= '0';
+			No_BTR <= '0';
+			Auto_Wait_t1 <= '0';
+			Auto_Wait_t2 <= '0';
+
 		elsif CLK_n'event and CLK_n = '1' then
 			if CEN = '1' then
 			if T_Res = '1' then
@@ -1018,18 +1066,17 @@ begin
 						BusAck <= '1';
 					else
 						TState <= "001";
+						
 						if NextIs_XY_Fetch = '1' then
 							MCycle <= "110";
 							Pre_XY_F_M <= MCycle;
 							if IR = "00110110" and Mode = 0 then
 								Pre_XY_F_M <= "010";
 							end if;
-						elsif (MCycle = "111") or
-							(MCycle = "110" and Mode = 1 and ISet /= "01") then
-							MCycle <= std_logic_vector(unsigned(Pre_XY_F_M) + 1);
 						elsif (MCycle = MCycles) or
 							No_BTR = '1' or
-							(MCycle = "010" and I_DJNZ = '1' and IncDecZ = '1') then
+							(MCycle = "010" and I_DJNZ = '1' and IncDecZ = '1') or
+							( MCycle = "111" and MCycles= "001" and Pre_XY_F_M = "001" ) then
 							M1_n <= '0';
 							MCycle <= "001";
 							IntCycle <= '0';
@@ -1042,6 +1089,9 @@ begin
 								IntE_FF1 <= '0';
 								IntE_FF2 <= '0';
 							end if;
+						elsif (MCycle = "111") or
+							(MCycle = "110" and Mode = 1 and ISet /= "01") then
+							MCycle <= std_logic_vector(unsigned(Pre_XY_F_M) + 1);
 						else
 							MCycle <= std_logic_vector(unsigned(MCycle) + 1);
 						end if;

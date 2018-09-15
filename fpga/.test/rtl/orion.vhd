@@ -126,6 +126,7 @@ architecture rtl of orion is
 			clk_sig		:	 IN STD_LOGIC;
 			resetn		:	 IN STD_LOGIC;
 			blion			:	 IN STD_LOGIC;
+			waitn			:	 IN STD_LOGIC;
 			addr			:	 OUT STD_LOGIC_VECTOR(15 downto 0);
 			data			:	 INOUT STD_LOGIC_VECTOR(7 downto 0);
 			iorqn			:	 OUT STD_LOGIC;
@@ -207,6 +208,7 @@ signal wrn					: std_logic;
 signal rdn					: std_logic;
 signal m1n					: std_logic;
 signal blion				: std_logic;
+signal waitn				: std_logic;
 signal ram_cen_v			: std_logic;
 signal ram_lbn				: std_logic;
 signal ram_ubn				: std_logic;
@@ -327,6 +329,7 @@ cpu: mod_cpu
 		clk_sig,
 		resetn,
 		blion,
+		waitn,
 		addr,
 		data,
 		iorqn,
