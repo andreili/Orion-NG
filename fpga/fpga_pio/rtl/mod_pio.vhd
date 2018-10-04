@@ -29,7 +29,8 @@ entity mod_pio is
 		romd_strobe	: out std_logic;
 		romd_csn		: out std_logic;
 		romd_idx		: out std_logic_vector(3 downto 0);
-		romd_bus		: inout std_logic_vector(7 downto 0);
+		romd_abus	: out std_logic_vector(7 downto 0);
+		romd_dbus	: in std_logic_vector(7 downto 0);
 		
 		sintn			: out std_logic;
 		swrn			: in std_logic;
@@ -73,8 +74,9 @@ signal pFB					: std_logic;
 signal pmF5					: std_logic;
 signal p08					: std_logic;
 signal p18					: std_logic;
+signal p28					: std_logic;
 signal cs_F4				: std_logic;
-signal cs_F5				: std_logic;
+signal cs_ROM				: std_logic;
 signal ctrl_o128			: std_logic;
 signal z80_port_en		: std_logic;
 signal p0A_wr				: std_logic;
@@ -105,13 +107,15 @@ fxxx <= addr(12) and addr(13) and addr(14) and addr(15) and ctrl_o128 and z80_po
 f4xx <= fxxx and (not addr(11)) and addr(10);
 fhxx <= iorqn or (not (blion and addr(3) and addr(4) and addr(5) and addr(6)));
 fhxx_sel <= addr(7) and (not (wrn)) and (not fhxx);
-Ox_sel <= (blion and (not (addr(5) or addr(6)))) and (not addr(7)) and (not iorqn);
+Ox_sel <= (blion and (not (addr(5) or addr(6)))) and (not addr(7)) and (not iorqn) and (not ctrl_o128);
 pmF4 <= f4xx and    addr(10)  and (not addr(9)) and (not addr(8));
 pmF5 <= f4xx and    addr(10)  and (not addr(9)) and      addr(8);
 pFB  <= fhxx_sel and      addr(0)  and      addr(1)  and (not addr(2));
 p08 <= Ox_sel and (not addr(2)) and addr(3) and (not addr(4));
 p18 <= Ox_sel and (not addr(2)) and addr(3) and addr(4);
+p28 <= blion and (not addr(7)) and addr(6) and (not addr(5)) and (not addr(4)) and (not addr(3)) and (not addr(2)) and (not iorqn);
 cs_F4 <= p18 or pmF4;
+cs_ROM <= pmF5 or p28;
 
 -- memory controls
 p0A_wr <= (not wrn) and P08 and addr(1) and (not addr(0));
@@ -135,8 +139,6 @@ begin
 	end if;
 end process;
 
--- registers processing
-
 --STM32 signals
 stm_int_req <= cs_F4 and ((not wrn) or (not rdn));
 
@@ -146,7 +148,7 @@ begin
 		sintn_in <= '1';
 	elsif (rising_edge(stm_int_req)) then
 		if ((srdn='1') and (swrn='1')) then
-			sintn_in <= '0';
+			--sintn_in <= '0';
 		end if;
 		stm_int_vector(1 downto 0) <= addr(1 downto 0);
 		stm_int_vector(2) <= cs_F4;
@@ -155,9 +157,10 @@ begin
 end process;
 sintn <= sintn_in;
 
-sdata <= "000" & stm_int_vector when ((swrn='1') and (srdn='1'))
+sdata <= --"000" & stm_int_vector when ((swrn='1') and (srdn='1'))
 	 --else "000" & data when ((srdn='0') and (sreg_idx="111"))
-	 else (others => 'Z');
+	 --else (others => 'Z');
+	 (others => 'Z');
 
 process (swrn)
 begin
@@ -230,7 +233,7 @@ end process;
 data <= vv_reg_1 when ((cs_F4 = '1') and (rdn = '0') and (addr(1 downto 0) = "01"))
 	else vv_reg_2 when ((cs_F4 = '1') and (rdn = '0') and (addr(1 downto 0) = "10"))
 	--else sdata(7 downto 0) when ((swrn='0') and (sreg_idx="111"))
-	else romd_bus when ((pmF5='1') and (rdn='0') and (addr(1) = '1') and (addr(0) = '0'))
+	else romd_dbus when ((cs_ROM='1') and (rdn='0') and (addr(1) = '1') and (addr(0) = '0'))
 	else (others => 'Z');
 
 mg_out <= vv_reg_2(0);
@@ -307,12 +310,12 @@ vv_reg_1(7) <= (kbd_row_0(7) or vv_reg_0(0)) and
 					(kbd_row_7(7) or vv_reg_0(7));
 
 -- ROM-disk
-romd_idx <= "1110" when ((pmF5='1') and (wrn='0') and (addr(1) = '0') and (addr(0) = '0'))	-- A0-A7
-		 else "1101" when ((pmF5='1') and (wrn='0') and (addr(1) = '0') and (addr(0) = '1'))	-- A8-A15
+romd_idx <= "1110" when ((cs_ROM='1') and (wrn='0') and (addr(1) = '0') and (addr(0) = '0'))	-- A0-A7
+		 else "1101" when ((cs_ROM='1') and (wrn='0') and (addr(1) = '0') and (addr(0) = '1'))	-- A8-A15
 		 else "1111";
-romd_csn <= '0' when ((pmF5='1') and (rdn='0') and (addr(1) = '1') and (addr(0) = '0'))
+romd_csn <= '0' when ((cs_ROM='1') and (rdn='0') and (addr(1) = '1') and (addr(0) = '0'))
 		 else '1';
-romd_bus <= data when ((pmF5='1') and (wrn='0') and (addr(1) = '0'))
+romd_abus <= data when ((cs_ROM='1') and (wrn='0') and (addr(1) = '0'))
 		 else (others => 'Z');
 			
 end rtl;
