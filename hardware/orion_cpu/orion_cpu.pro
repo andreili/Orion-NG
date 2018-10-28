@@ -1,4 +1,4 @@
-update=Вт 02 окт 2018 15:55:32
+update=Вт 23 окт 2018 09:15:00
 version=1
 last_client=kicad
 [cvpcb]
@@ -24,7 +24,7 @@ ERC_TestSimilarLabels=1
 [pcbnew]
 version=1
 PageLayoutDescrFile=
-LastNetListRead=
+LastNetListRead=orion_cpu.net
 CopperLayerCount=2
 BoardThickness=1
 AllowMicroVias=0
