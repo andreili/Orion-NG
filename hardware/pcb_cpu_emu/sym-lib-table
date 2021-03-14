@@ -1,3 +1,0 @@
-(sym_lib_table
-  (lib (name orion_cpu_emu-rescue)(type Legacy)(uri ${KIPRJMOD}/orion_cpu_emu-rescue.lib)(options "")(descr ""))
-)

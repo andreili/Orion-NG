@@ -1,7 +1,0 @@
-(sym_lib_table
-  (lib (name "orion_video-rescue")(type "Legacy")(uri "${KIPRJMOD}/orion_video-rescue.lib")(options "")(descr ""))
-  (lib (name "orion")(type "KiCad")(uri "D:/Projects/Kicad/orion.kicad_sym")(options "")(descr ""))
-  (lib (name "Device")(type "Legacy")(uri "${KICAD_SYMBOL_DIR}/device.lib")(options "")(descr ""))
-  (lib (name "74xGxx")(type "Legacy")(uri "${KICAD_SYMBOL_DIR}/74xgxx.lib")(options "")(descr ""))
-  (lib (name "Connector")(type "Legacy")(uri "${KICAD_SYMBOL_DIR}/Connector.lib")(options "")(descr ""))
-)
