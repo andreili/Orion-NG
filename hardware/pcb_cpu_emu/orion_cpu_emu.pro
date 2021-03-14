@@ -1,4 +1,4 @@
-update=Вт 23 окт 2018 15:31:12
+update=20.06.2020 1:15:29
 version=1
 last_client=kicad
 [cvpcb]
@@ -6,21 +6,6 @@ version=1
 NetIExt=net
 [general]
 version=1
-[eeschema]
-version=1
-LibDir=../../hardware
-[eeschema/libraries]
-LibName1=orion_cpu_emu-rescue
-[schematic_editor]
-version=1
-PageLayoutDescrFile=
-PlotDirectoryName=
-SubpartIdSeparator=0
-SubpartFirstId=65
-NetFmtName=
-SpiceAjustPassiveValues=0
-LabSize=60
-ERC_TestSimilarLabels=1
 [pcbnew]
 version=1
 PageLayoutDescrFile=
@@ -77,4 +62,19 @@ SolderMaskClearance=0.15
 SolderMaskMinWidth=0.25
 SolderPasteClearance=0
 SolderPasteRatio=-0
+[schematic_editor]
+version=1
+PageLayoutDescrFile=
+PlotDirectoryName=
+SubpartIdSeparator=0
+SubpartFirstId=65
+NetFmtName=
+SpiceAjustPassiveValues=0
+LabSize=60
+ERC_TestSimilarLabels=1
+[eeschema]
+version=1
+LibDir=
+[sheetnames]
+1=79d5c38a-f8c9-4829-b7f6-02f8f1f4298e:
 

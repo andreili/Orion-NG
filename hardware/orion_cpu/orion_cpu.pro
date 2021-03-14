@@ -1,4 +1,4 @@
-update=Вт 23 окт 2018 09:15:00
+update=09.07.2020 21:34:05
 version=1
 last_client=kicad
 [cvpcb]
@@ -6,11 +6,6 @@ version=1
 NetIExt=net
 [general]
 version=1
-[eeschema]
-version=1
-LibDir=../../hardware
-[eeschema/libraries]
-LibName1=orion_cpu-rescue
 [schematic_editor]
 version=1
 PageLayoutDescrFile=
@@ -83,4 +78,7 @@ SolderMaskClearance=0.15
 SolderMaskMinWidth=0.25
 SolderPasteClearance=0
 SolderPasteRatio=-0
+[eeschema]
+version=1
+LibDir=
 
