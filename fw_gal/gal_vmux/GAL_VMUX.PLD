@@ -9,49 +9,84 @@ Location  ;
 Device   g22v10;
 
 PIN  1  = BLn;
-PIN  2  = p4;
+PIN  2  = p0;
 PIN  3  = p2;
-PIN  4  = vm1;
-PIN  5  = vm0;
-PIN  6  = vm4;
+PIN  4  = vm0;
+PIN  5  = vm1;
+PIN  6  = vm2;
 PIN  7  = p1;
-PIN  8  = ps3;
-PIN  9  = ps2;
-PIN  10  = ps1;
-PIN  11  = ps0;
-PIN  13  = ps7;
-PIN  14  = ps6;
-PIN  15  = ps5;
-PIN  16  = ps4;
-PIN  17 = p3;
-PIN  18  = R;
-PIN  19 = IR;
-PIN  20 = G;
-PIN  21 = IG;
-PIN  22 = B;
-PIN  23 = IB;
+PIN  8  = p3;
+PIN  9  = ps3;
+PIN  10 = ps5;
+PIN  11 = ps4;
+PIN  13 = ps0;
+PIN  14 = ps7;
+PIN  15 = ps1;
+PIN  16 = ps2;
+PIN  17 = ps6;
+PIN  18 = BI;
+PIN  19 = BB;
+PIN  20 = GI;
+PIN  21 = GG;
+PIN  22 = RI;
+PIN  23 = RR;
 
-R = BLn & (
-	  ((!vm4 & !vm1) & ((p2 & p1) # (!p2 & (p1 & vm0))))		/* standart mode */
-	# ((!vm4 & vm1) & ((p1 & ps2) # (!p1 & ps6)))			/* pseudocolors mode */
-	# (vm4 & p3));	
-G = BLn & (
-	  ((!vm4 & !vm1) & (!p2 & (p1 & !vm0)))				/* standart mode */
-	# ((!vm4 & vm1) & ((p1 & ps1) # (!p1 & ps5)))			/* pseudocolors mode */
-	# (vm4 & p1));
-B = BLn & (
-	  ((!vm4 & !vm1) & ((p2 & !p1) # (!p2 & (p1 & vm0))))		/* standart mode */
-	# ((!vm4 & vm1) & ((p1 & ps0) # (!p1 & ps4)))			/* pseudocolors mode */
-	# (vm4 & p4));
-IR = BLn & (
-	  ((!vm4 & !vm1) & ((p2 & p1) # (!p2 & (p1 & vm0))))		/* standart mode */
-	# ((!vm4 & vm1) & ((p1 & ps2 & ps3) # (!p1 & ps6 & ps7)))	/* pseudocolors mode */
-	# (vm4 & p2 & p3));	
-IG = BLn & (
-	  ((!vm4 & !vm1) & (!p2 & (p1 & !vm0)))				/* standart mode */
-	# ((!vm4 & vm1) & ((p1 & ps1 & ps3) # (!p1 & ps5 & ps7)))	/* pseudocolors mode */
-	# (vm4 & p2 & p1));
-IB = BLn & (
-	  ((!vm4 & !vm1) & ((p2 & !p1) # (!p2 & (p1 & vm0))))		/* standart mode */
-	# ((!vm4 & vm1) & ((p1 & ps0 & ps3) # (!p1 & ps4 & ps7)))	/* pseudocolors mode */
-	# (vm4 & p2 & p4));
+RR = BLn & (
+	(!vm2 &  vm1 & !vm0 & !p0) #
+	(!vm2 &  vm1 &  vm0 & !p0 & p1) #
+	( vm2 & !vm1 & !vm0 & !p0) #
+	( vm2 & !vm1 &  vm0 & !p0 & ps6)#
+	( vm2 & !vm1 &  vm0 &  p0 & ps2)#
+	( vm2 &  vm1 & p2)
+	);
+GG = BLn & (
+	(!vm2 & !vm1 &  vm0 &  p0) #
+	(!vm2 &  vm1 & !vm0) #
+	(!vm2 &  vm1 &  vm0 &  p0 & !p1) #
+	( vm2 & !vm1 & !vm0 & !p1) #
+	( vm2 & !vm1 &  vm0 & !p0 & ps5)#
+	( vm2 & !vm1 &  vm0 &  p0 & ps1)#
+	( vm2 &  vm1 & p0)
+	);
+BB = BLn & (
+	(!vm2 &  vm1 & !vm0 & !p0) #
+	(!vm2 &  vm1 &  vm0 &  p0 & p1) #
+	( vm2 & !vm1 & !vm0 & (!p0 $ !p1)) #
+	( vm2 & !vm1 &  vm0 & !p0 & ps4)#
+	( vm2 & !vm1 &  vm0 &  p0 & ps0)#
+	( vm2 &  vm1 & p3)
+	);
+I  = BLn & (
+	(!vm2 & !vm1 &  vm0 &  p0) #
+	(!vm2 &  vm1 & !vm0) #
+	(!vm2 &  vm1 &  vm0 & (p0 # p1)) #
+	( vm2 & !vm1 & !vm0) #
+	( vm2 & !vm1 &  vm0 & !p0 & ps7)#
+	( vm2 & !vm1 &  vm0 &  p0 & ps3)#
+	( vm2 &  vm1 &  vm0 & p1)
+	  );
+RI = BLn & (
+	(!vm2 &  vm1 & !vm0 & !p0) #
+	(!vm2 &  vm1 &  vm0 & !p0 & p1) #
+	( vm2 & !vm1 & !vm0 & !p0) #
+	( vm2 & !vm1 &  vm0 & !p0 & ps6)#
+	( vm2 & !vm1 &  vm0 &  p0 & ps2)#
+	( vm2 &  vm1 & p2)
+	) & I;
+GI = BLn & (
+	(!vm2 & !vm1 &  vm0 &  p0) #
+	(!vm2 &  vm1 & !vm0) #
+	(!vm2 &  vm1 &  vm0 &  p0 & !p1) #
+	( vm2 & !vm1 & !vm0 & !p1) #
+	( vm2 & !vm1 &  vm0 & !p0 & ps5)#
+	( vm2 & !vm1 &  vm0 &  p0 & ps1)#
+	( vm2 &  vm1 & p0)
+	) & I;
+BI = BLn & (
+	(!vm2 &  vm1 & !vm0 & !p0) #
+	(!vm2 &  vm1 &  vm0 &  p0 & p1) #
+	( vm2 & !vm1 & !vm0 & (!p0 $ !p1)) #
+	( vm2 & !vm1 &  vm0 & !p0 & ps4)#
+	( vm2 & !vm1 &  vm0 &  p0 & ps0)#
+	( vm2 &  vm1 & p3)
+	) & I;

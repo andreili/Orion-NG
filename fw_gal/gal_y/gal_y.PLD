@@ -1,0 +1,43 @@
+Name     gal_y ;
+PartNo   00 ;
+Date     05.05.2018 ;
+Revision 01 ;
+Designer andreil ;
+Company   ;
+Assembly ;
+Location  ;
+Device   g22v10;
+
+PIN  1 = XLE;
+PIN [11..2] = [y0..9];
+PIN 13 = vmode0;
+PIN 14 = vmode1;
+
+PIN 23 = y_clk;
+PIN 22 = y_clk_pre;
+
+PIN 21 = !YRES;
+PIN 20 = BV_N;
+PIN 19 = VS;
+PIN 18 = FRAME_END;
+/* 17 16 15 */
+
+FIELD y_val = [y9..0];
+
+y_clk.d = !y_clk & y_clk_pre;
+y_clk_pre.d = !(y_clk_pre & y_clk);
+y_clk.ar = 'b'0;
+y_clk.sp = 'b'0;
+y_clk_pre.ar = 'b'0;
+y_clk_pre.sp = 'b'0;
+
+YRES = (!vmode1 & !vmode0 & y_val:'h'1c0) #
+	(!vmode1 &  vmode0 & y_val:'h'1c0) #
+	( vmode1 & !vmode0 & y_val:'h'20c) #
+	( vmode1 &  vmode0 & y_val:'h'176);
+BV_N = y_val:[0..ff];
+VS =   (!vmode1 & !vmode0 & y_val:[154..155]) #
+	(!vmode1 &  vmode0 & y_val:[154..155]) #
+	( vmode1 & !vmode0 & y_val:[17a..17b]) #
+	( vmode1 &  vmode0 & y_val:[135..136]);
+FRAME_END = y_val:'h'100;

@@ -1,0 +1,54 @@
+Name     gal_x ;
+PartNo   00 ;
+Date     05.05.2018 ;
+Revision 01 ;
+Designer andreil ;
+Company   ;
+Assembly ;
+Location  ;
+Device   g22v10;
+
+PIN  [1..10] = [x0..9];
+PIN  11  = vmode0;
+PIN  13  = vmode1;
+PIN  16  = BV_N;
+PIN  15  = !XRES_N;
+PIN  14  = XLE;
+PIN  17  = BL_N;
+PIN  18  = HS_pre;
+PIN  21  = HS;
+PIN  22  = BE;
+PIN  23  = SR16;
+
+FIELD x_val = [x9..0];
+FIELD x_val_640 = [x9..4];
+
+XRES_N = (vmode0 & vmode1 & x_val:'h'2dd) # ((!vmode0 # !vmode1) & x_val:'h'31f);
+BE = !(x2 & x1 & x0);
+HS_pre = ((!vmode0 # !vmode1) & !SR16 & x9 & !x8 & !x7 &
+		(
+			(!x6 & !x5 & x4) #
+			(!x6 & x5 & !x4) #
+			(!x6 & x5 & x4) #
+			(x6 & !x5 & !x4) #
+			(x6 & !x5 & x4) #
+			(x6 & x5 & !x4)
+		)) #	/* 21..26 */
+	((!vmode0 # !vmode1) & SR16 & x9 & !x8 &
+		(
+			(!x7 & x6 & !x5 & x4) #
+			(!x7 & x6 & x5 & !x4) #
+			(!x7 & x6 & x5 & x4) #
+			(x7 & !x6 & !x5 & !x4) #
+			(x7 & !x6 & !x5 & x4) #
+			(x7 & !x6 & x5 & !x4)
+		)) #	/* 25..2a */
+	(vmode0 & vmode1 & !SR16 & x9 & !x8 & !x7 & !x6 & x5 & !x4) #
+	(vmode0 & vmode1 & SR16 & x9 & !x8 & !x7 & x6 & x5 & !x4)
+    ;
+HS = HS_pre $ (vmode0 $ vmode1);
+BL_N = BV_N & ((!SR16 & x_val:[8..187]) # (SR16 & x_val:[8..207]));
+XLE = ((!vmode0 # !vmode1) & !SR16 & x_val:'h'29f) #
+	((!vmode0 # !vmode1) & SR16 & x_val:'h'2df) #
+	(vmode0 & vmode1 & !SR16 & x_val:'h'25d) #
+	(vmode0 & vmode1 & SR16 & x_val:'h'29d);

@@ -1,0 +1,60 @@
+Name     gal_int ;
+PartNo   00 ;
+Date     06.05.2018 ;
+Revision 01 ;
+Designer andreil ;
+Company  None ;
+Assembly None ;
+Location  ;
+Device   g22v10;
+
+PIN  1  = irqsn;
+PIN  2  = irq7;
+PIN  3  = irq6;
+PIN  4  = irq5;
+PIN  5  = irq4;
+PIN  6  = irq3;
+PIN  7  = irq2;
+PIN  8  = irq1;
+PIN  9  = irq0;
+PIN  10  = iorqn;
+PIN  11  = m1n;
+
+PIN  14  = d4;
+PIN  15  = d3;
+PIN  16  = d5;
+PIN  17 = d6;
+PIN  18  = dirqn;
+PIN  19 = d2;
+PIN  20 = d7;
+PIN  21 = d0;
+PIN  22 = d1;
+PIN  23 = intn;
+
+intn = irq0 & irq1 & irq2 & irq3 & irq4 & irq5 & irq6 & irq7 & irqsn;
+dirqn = iorqn # m1n;
+
+d0 = m1n;
+d0.oe = !dirqn;
+d1 = !((!irq6 & irq5 & irq3 & irq2) # 
+    (!irq4 & irq3 & irq1) # 
+    (!irq2 & irq1) # 
+    !irq0);
+d1.oe = !dirqn;
+d2 = !((!irq5 & irq3 & irq2) # 
+    (!irq4 & irq3 & irq2) # 
+    !irq1 # 
+    !irq0);
+d2.oe = !dirqn;
+d3 = !(!irq3 # !irq2 # !irq1 # !irq0);
+d3.oe = !dirqn;
+d4 = m1n;
+d4.oe = !dirqn;
+d5 = m1n;
+d5.oe = !dirqn;
+d6 = m1n;
+d6.oe = !dirqn;
+d7 = m1n;
+d7.oe = !dirqn;
+
+

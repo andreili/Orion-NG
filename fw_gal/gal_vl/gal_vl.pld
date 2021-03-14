@@ -1,0 +1,30 @@
+Name     gal_vl ;
+PartNo   00 ;
+Date     05.05.2018 ;
+Revision 01 ;
+Designer andreil ;
+Company   ;
+Assembly ;
+Location  ;
+Device   g22v10;
+
+PIN  1 = clk;
+PIN  2 = vs0;
+PIN  3 = vs1;
+
+PIN 23 = clk_out;
+PIN 22 = clk_div;
+
+clk_div.d = !clk_div;
+clk_div.ar = 'b'0;
+clk_div.sp = 'b'0;
+
+clk_out = (clk_div & (!vs0 # !vs1)) # (clk & vs0 & vs1);
+
+/*clk2_4.d = !clk2_4 & clk_p;
+clk_p.d = !(clk_p & clk2_4);
+clk2_4.ar = 'b'0;
+clk2_4.sp = 'b'0;
+clk_p.ar = 'b'0;
+clk_p.sp = 'b'0;*/
+
