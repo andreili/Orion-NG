@@ -42,3 +42,5 @@ rescue-backup
 *.db_info
 db/*
 out/*
+
+fw/video_ctrl/out/*
