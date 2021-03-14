@@ -11,7 +11,7 @@ _p1d_set	=	0x001d
 _p3b_set	=	0x003b
 _pfa_vbank	=	0x00fa
 _pfc_color_reg	=	0x00fc
-_pf8_vmode	=	0x00f8
+_pf8_vmode	=	0xf8
 
 CONFIG_TURBO_BIT = 3
 CONFIG_WIDE_BIT = 4
@@ -54,6 +54,7 @@ init:
     out	(_p0a_mem_man), a
     ld	a, 0x00
     out	(_pf8_vmode), a
+	jp		fill_vmem
 
 main:
     in      a, (_p00_config)
@@ -101,7 +102,7 @@ wait_loop1:
     jr      main
 
 TEST_TITLE:
-	.db "ORION-128 NG tests (andreil, 2018)", 0x00
+	.db "ORION-128 NG tests (andreil, 2020)", 0x00
 
 mem_test:
     ; monochrome video mode
@@ -133,6 +134,37 @@ video_tests:
     .DW test_3bit
     .DW test_4bit
 
+fill_vmem:
+	; enable window on RAM1
+	in		a, (_p0a_mem_man)
+	set		MEMM_RAM1EN_BIT, a
+	out		(_p0a_mem_man), a
+	ld		c, 0
+	; set RAM 1 segment
+loop_seg:
+	ld		a, c
+	out		(_p05_RAM1), a
+	; screen pointer
+	ld		hl, RAM1_WINDOW
+	ld		d, 00
+loop_vm:
+    ld      (hl), d
+    inc     hl
+	; check end
+	ld		a, h
+	cp		0x80
+    jr      NZ, loop_vm
+	ld		a, c
+	inc		c
+	cp		28
+    jr      NZ, loop_seg
+	; disable window on RAM1
+	in		a, (_p0a_mem_man)
+	res		MEMM_RAM1EN_BIT, a
+	nop
+	out		(_p0a_mem_man), a
+	jp main
+
 set_turbo:
     in      a, (_p0a_mem_man)
     res     MEMM_TURBO_BIT, a
@@ -157,6 +189,8 @@ VMODE_4COLOR_1PALLETE = 0x04
 VMODE_4COLOR_2PALLETE = 0x05
 VMODE_16COLOR_GROUP   = 0x06
 VMODE_16COLOR_PALLET  = 0x0e
+VMODE_3BIT			  = 0x10
+VMODE_4BIT			  = 0x14
 
 VIDEO_TEST_0_TITLE:
 	.db "TEST: 2 colors, pallete 1           ", 0x00
@@ -251,7 +285,14 @@ test_16colors_pallet_end2:
 	jp		print_str
 
 test_3bit:
+    ld      a, VMODE_3BIT
+    out     (_pf8_vmode), a
+    jp      fill_scr_1
 test_3bit_end:
+	jp		fill_scr_blue
+test_3bit_end3:
+	jp		fill_scr_red
+test_3bit_end4:
 	ld		de, VIDEO_TEST_6_TITLE
 	ld		iyh, 0
 	ld		iyl, 29
@@ -259,7 +300,17 @@ test_3bit_end:
 	jp		print_str
 
 test_4bit:
+    ld      a, VMODE_4BIT
+    out     (_pf8_vmode), a
+    jp      fill_scr_1
 test_4bit_end:
+	; fill I
+	jp		fill_scr_2_4c
+test_4bit_end2:
+	jp		fill_scr_blue
+test_4bit_end3:
+	jp		fill_scr_red
+test_4bit_end4:
 	ld		de, VIDEO_TEST_7_TITLE
 	ld		iyh, 0
 	ld		iyl, 29
@@ -362,7 +413,7 @@ test_ret_table_2:
     .DW test_16colors_group_end2
     .DW 0
     .DW 0
-    .DW 0
+    .DW test_4bit_end2
 
 fill_scr_2_4c:
 	; enable window on RAM1
@@ -517,6 +568,218 @@ fill3_end:
     ld      l, a
     add     hl, hl
     ld      de, test_ret_table_2
+    add     hl, de
+    ld      a, (hl)
+    inc     hl
+    ld      h, (hl)
+    ld      l, a
+    jp      (hl)
+
+test_ret_table_3:
+    .DW 0
+    .DW 0
+    .DW 0
+    .DW 0
+    .DW 0
+    .DW 0
+    .DW test_3bit_end3
+    .DW test_4bit_end3
+
+fill_scr_blue:
+	; enable window on RAM1
+	in		a, (_p0a_mem_man)
+	set		MEMM_RAM1EN_BIT, a
+	out		(_p0a_mem_man), a
+	; set RAM 1 to segment #6
+	ld		a, 6
+	out		(_p05_RAM1), a
+	; screen pointer
+	ld		hl, RAM1_WINDOW
+	ld		d, 0 ; columns
+fill4_row:
+	ld		c, 0
+	; rows main
+fill4_sr1:
+	ld		a, l
+	and		0x08
+	cp		0x08
+	jr		C, fill4_ff
+	ld		a, 0x00
+	jp		fill4_st
+fill4_ff:
+	ld		a, 0xff
+fill4_st:
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	inc		c
+	ld		a, c
+	cp		0x1c
+	jr		C, fill4_sr1
+	; rows titles
+	;ld		a, d
+	;and		0x0f
+	;jr		NZ, fill3_nz
+	ld		a, 1
+fill4_nz:
+	ld		e, 0
+	ld		a, 0
+fill4_sr2:
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	inc		a
+	cp		0x4
+	jr		C, fill4_sr2
+	; decrease columns counter
+	inc		d
+	ld		a, d
+	cp		64
+	jr		C, fill4_row
+fill4_end:
+	; disable window on RAM1
+	in		a, (_p0a_mem_man)
+	res		MEMM_RAM1EN_BIT, a
+	out		(_p0a_mem_man), a
+    ; return to test
+    ld      a, b        ; load configuration to A
+    and     0x07        ; extract video test number
+    ld      h, 0
+    ld      l, a
+    add     hl, hl
+    ld      de, test_ret_table_3
+    add     hl, de
+    ld      a, (hl)
+    inc     hl
+    ld      h, (hl)
+    ld      l, a
+    jp      (hl)
+
+test_ret_table_4:
+    .DW 0
+    .DW 0
+    .DW 0
+    .DW 0
+    .DW 0
+    .DW 0
+    .DW test_3bit_end4
+    .DW test_4bit_end4
+
+fill_scr_red:
+	; enable window on RAM1
+	in		a, (_p0a_mem_man)
+	set		MEMM_RAM1EN_BIT, a
+	out		(_p0a_mem_man), a
+	; set RAM 1 to segment #2
+	ld		a, 2
+	out		(_p05_RAM1), a
+	; screen pointer
+	ld		hl, RAM1_WINDOW
+	ld		d, 0 ; columns
+fill5_row:
+	ld		c, 0
+	; rows main
+fill5_sr1:
+	ld		a, l
+	and		0x10
+	cp		0x10
+	jr		C, fill5_ff
+	ld		a, 0x00
+	jp		fill5_st
+fill5_ff:
+	ld		a, 0xff
+fill5_st:
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	ld		(hl), a
+	inc		hl
+	inc		c
+	ld		a, c
+	cp		0x1c
+	jr		C, fill5_sr1
+	; rows titles
+	;ld		a, d
+	;and		0x0f
+	;jr		NZ, fill3_nz
+	ld		a, 1
+fill5_nz:
+	ld		e, 0
+	ld		a, 0
+fill5_sr2:
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	ld		(hl), e
+	inc		hl
+	inc		a
+	cp		0x4
+	jr		C, fill5_sr2
+	; decrease columns counter
+	inc		d
+	ld		a, d
+	cp		64
+	jr		C, fill5_row
+fill5_end:
+	; disable window on RAM1
+	in		a, (_p0a_mem_man)
+	res		MEMM_RAM1EN_BIT, a
+	out		(_p0a_mem_man), a
+    ; return to test
+    ld      a, b        ; load configuration to A
+    and     0x07        ; extract video test number
+    ld      h, 0
+    ld      l, a
+    add     hl, hl
+    ld      de, test_ret_table_4
     add     hl, de
     ld      a, (hl)
     inc     hl
