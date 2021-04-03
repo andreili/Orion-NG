@@ -81,7 +81,7 @@ static const struct
 } pll_table[] = 
 {
     /*freq    c  r  vco cp                 N   M  C0  C1  C2  C3  C4 */
-    148438, { 0, 27, 0, 0, CALC_PLL_CONST( 4, 95,  8,  4,  0,  0,  0)},
+    148438, { 0, 27, 0, 0, CALC_PLL_CONST( 4, 95,  4,  0,  0,  0,  0)},
 };
 
 #define PLL_TABLE_SIZE (sizeof(pll_table) / sizeof(pll_table[0]))

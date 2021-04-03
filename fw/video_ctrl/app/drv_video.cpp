@@ -72,6 +72,10 @@ void CVideo::dump_hdmi()
         xprintf("DE_GEN=%d DE_TOP=%d DE_CNT=%d DE_LIN=%d H_RES=%d V_RES=%d\n",
             m_hdmi.DE_GEN, m_hdmi.DE_TOP, m_hdmi.DE_CNT, m_hdmi.DE_LIN, m_hdmi.H_RES, m_hdmi.V_RES);
     }
+    else
+    {
+        xprintf("Failed to get data!\n");
+    }
 }
 
 void CVideo::set_vreg(uint32_t from_addr, uint32_t count)
