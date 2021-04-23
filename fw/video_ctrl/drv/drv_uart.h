@@ -10,7 +10,7 @@ public:
     void send_start_IT(uint8_t data)
     {
         WRITE_REG32(&m_uart->DR, data);
-        MODIFY_REG32(&m_uart->CR1, USART_CR1_TXEIE, USART_CR1_TXEIE);
+        MODIFY_REG32(&m_uart->CR1, USART_CR1_TXEIE | USART_CR1_TCIE, USART_CR1_TXEIE | USART_CR1_TCIE);
         m_tx_busy = true;
     }
     void send_char(char ch);

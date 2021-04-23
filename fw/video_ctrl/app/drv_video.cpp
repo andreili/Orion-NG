@@ -78,6 +78,20 @@ void CVideo::dump_hdmi()
     }
 }
 
+void CVideo::get_vreg(uint32_t from_addr, uint32_t count)
+{
+    tx_buf[0] = (from_addr + VIDEO_CTRL_BASE_ADDR);
+    tx_buf[1] = count;
+
+    gpioa.pin_DOWN(EGPIOPins::PIN_15);
+    // disable I2C1 clock - see ERRATA for STM32F103 medium density devices (ES096)
+    CRCC::set_clk_APB1_enabled(EPeriph::APB1_I2C1, false);
+    spi1.transmit_receive(tx_buf, rx_buf, count + 3, 1000);
+    memcpy(&m_vregs.bt[from_addr], &rx_buf[2], count);
+    gpioa.pin_UP(EGPIOPins::PIN_15);
+    CRCC::set_clk_APB1_enabled(EPeriph::APB1_I2C1, true);
+}
+
 void CVideo::set_vreg(uint32_t from_addr, uint32_t count)
 {
     tx_buf[0] = (1 << 7) | (from_addr + VIDEO_CTRL_BASE_ADDR);

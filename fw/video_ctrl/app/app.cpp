@@ -57,6 +57,8 @@ void App::entry_point()
 #ifdef DEBUG
     shell.init("VideoCTRL");
 #endif
+    CORTEX::enable_irq();
+
     while (1)
     {
     #ifdef DEBUG

@@ -1,9 +1,11 @@
 #pragma once
 
 #include <cstdint>
+#include "xprintf.h"
 
 #define VREG_RSEN 9
 #define VREG_ACTIVE 12
+#define VREG_PRESENT 16
 #define TFP_ADDR 0x7e
 
 #pragma pack(push, 1)
@@ -25,8 +27,8 @@ typedef union
         uint32_t v_sync_pos     : 1;
         uint32_t h_sync_pos     : 1;
     };
-    uint32_t dw[4];
-    uint8_t bt[16];
+    uint32_t dw[5];
+    uint8_t bt[20];
 } video_ctrl_t;
 
 typedef union
@@ -165,9 +167,19 @@ public:
         set_vreg(VREG_ACTIVE, 1);
     }
     static void apply_res() { set_vreg(0, VREG_ACTIVE + 1); }
+    static bool is_video_present()
+    {
+        m_vregs.bt[VREG_PRESENT] = 0;
+        get_vreg(VREG_PRESENT, 1);
+        #ifdef DEBUG
+        xprintf("Readed value: 0x%x\n", m_vregs.bt[VREG_PRESENT]);
+        #endif
+        return (m_vregs.bt[VREG_PRESENT] == 0x5a);
+    }
 private:
     static video_ctrl_t     m_vregs;
     static hdmi_regs_r      m_hdmi;
+    static void get_vreg(uint32_t from_addr, uint32_t count);
     static void set_vreg(uint32_t from_addr, uint32_t count);
     static bool get_hreg(uint32_t from, uint32_t count);
     static bool set_hreg(uint32_t from, uint32_t count);

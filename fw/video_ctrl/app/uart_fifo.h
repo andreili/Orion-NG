@@ -20,10 +20,10 @@ public:
     char rx_pop();
     bool rx_empty() { return IS_FIFO_EMPTY(m_rx_tail, m_rx_head); }
 private:
-    uint32_t    m_tx_head;
-    uint32_t    m_tx_tail;
-    uint32_t    m_rx_head;
-    uint32_t    m_rx_tail;
+    volatile uint32_t    m_tx_head;
+    volatile uint32_t    m_tx_tail;
+    volatile uint32_t    m_rx_head;
+    volatile uint32_t    m_rx_tail;
     char        m_tx_buf[TX_BUF_SIZE];
     char        m_rx_buf[RX_BUF_SIZE];
 };

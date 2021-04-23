@@ -90,6 +90,10 @@ run: size.stdout $(BIN_FILE)
 	$(info Programming device)
 	@./tools/ST-LINK_CLI.exe -ME -P $(BIN_FILE) 0x08000000 -V -HardRst
 
+reset: size.stdout
+	$(info Resetting device)
+	@./tools/ST-LINK_CLI.exe -ME -V -HardRst
+
 secondary-outputs: size.stdout $(LIST_FILE) $(BIN_FILE)
 
 .PHONY: all clean

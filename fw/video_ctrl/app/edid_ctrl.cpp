@@ -332,7 +332,11 @@ extern CI2C i2c1;
 
 void CEDIDCtrl::periodic_rescan()
 {
-    // TODO: scan HDMI addresses
+    if (!CVideo::is_video_present())
+    {
+        reset();
+        return;
+    }
 
     uint32_t offset = 0;
     if (i2c1.master_transmit(EDID_ADDR_VGA, (uint8_t*)&offset, 1, 1000, true))

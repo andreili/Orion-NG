@@ -164,13 +164,13 @@ void xprintf (			/* Put a formatted string to the default device */
 {
 	va_list arp;
 
-    __ASM volatile ("cpsid i" : : : "memory");
+    //__ASM volatile ("cpsid i" : : : "memory");
     outptr = 0;			/* Switch destination for device */
 
 	va_start(arp, fmt);
 	xvprintf(fmt, arp);
 	va_end(arp);
-    __ASM volatile ("cpsie i" : : : "memory");
+    //__ASM volatile ("cpsie i" : : : "memory");
 }
 
 

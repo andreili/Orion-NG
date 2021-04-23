@@ -8,6 +8,7 @@ static inline void set_priority(uint32_t irqn, uint32_t prior, uint32_t subprior
 
 void CNVIC::init()
 {
+    CORTEX::SCB::VTOR::set(0x8000000);
     CORTEX::NVIC::set_priority_grouping(CORTEX::NVIC::EPriorityGroup::GROUP_4);
     set_priority(MemoryManagement_IRQn, 0, 0);
     set_priority(BusFault_IRQn, 0, 0);

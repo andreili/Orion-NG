@@ -103,8 +103,8 @@ void CUART::isr_handler()
         if (ch == '\0')
         {
             // end of transmit
-            MODIFY_REG32(&m_uart->CR1, USART_CR1_TXEIE, 0);
-            m_tx_busy = 0;
+            MODIFY_REG32(&m_uart->CR1, USART_CR1_TXEIE | USART_CR1_TCIE, 0);
+            m_tx_busy = false;
         }
         else
         {
