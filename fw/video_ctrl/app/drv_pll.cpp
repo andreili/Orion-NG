@@ -63,9 +63,9 @@ typedef union
 uint32_t _pll_n, _pll_m, _pll_c, _pll_freq;
 int32_t _pll_dist;
 
-#define PLL_ODD(val) ((val==0)?0:(((val%2)==0)?0:1))
-#define PLL_BP(val) ((val==0)?1:0)
-#define PLL_HI(val) ((val%2)==0?val/2:((val/2)+1))
+#define PLL_ODD(val) ((val==0) ? (uint32_t)0 : (((val%2)==0) ? (uint32_t)0 : (uint32_t)1))
+#define PLL_BP(val) ((val==0) ? (uint32_t)1 : (uint32_t)0)
+#define PLL_HI(val) ((val%2)==0 ? (val/2) : ((val/2)+1))
 #define PLL_LO(val) (val/2)
 #define CALC_PLL_CONST(n, m, c0, c1, c2, c3, c4) \
     PLL_ODD(n), PLL_BP(n), PLL_ODD(m), PLL_BP(m), PLL_ODD(c0), PLL_BP(c0), \
