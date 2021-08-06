@@ -130,13 +130,10 @@ void CPLL::set_pll_regs()
     tx_buf[0] = (1 << 7) | (PLL_CTRL_BASE_ADDR);
     tx_buf[1] = size;
 
-    gpioa.pin_DOWN(EGPIOPins::PIN_15);
-    // disable I2C1 clock - see ERRATA for STM32F103 medium density devices (ES096)
-    CRCC::set_clk_APB1_enabled(EPeriph::APB1_I2C1, false);
+    gpioa.pin_DOWN(EGPIOPins::PIN_3);
     memcpy(&tx_buf[2], &regs.dw[0], size);
     spi1.transmit_receive(tx_buf, rx_buf, size + 2, 1000);
-    gpioa.pin_UP(EGPIOPins::PIN_15);
-    CRCC::set_clk_APB1_enabled(EPeriph::APB1_I2C1, true);
+    gpioa.pin_UP(EGPIOPins::PIN_3);
 }
 
 void CPLL::update_pll()
@@ -145,12 +142,9 @@ void CPLL::update_pll()
     tx_buf[0] = (1 << 7) | (PLL_CTRL_BASE_ADDR + PLL_UPDATE_OFFSET);
     tx_buf[1] = size;
 
-    gpioa.pin_DOWN(EGPIOPins::PIN_15);
-    // disable I2C1 clock - see ERRATA for STM32F103 medium density devices (ES096)
-    CRCC::set_clk_APB1_enabled(EPeriph::APB1_I2C1, false);
+    gpioa.pin_DOWN(EGPIOPins::PIN_3);
     spi1.transmit_receive(tx_buf, rx_buf, size + 2, 1000);
-    gpioa.pin_UP(EGPIOPins::PIN_15);
-    CRCC::set_clk_APB1_enabled(EPeriph::APB1_I2C1, true);
+    gpioa.pin_UP(EGPIOPins::PIN_3);
 }
 
 #define PLL_MAX_N 512
@@ -159,7 +153,7 @@ void CPLL::update_pll()
 #define PLL_VCO_MIN (600 * 1000)
 #define PLL_VCO_MAX (1200 * 1000)
 #define PLL_OUT_MAX 402500
-#define PLL_INPUT (50 * 1000)
+#define PLL_INPUT (25 * 1000)
 
 void CPLL::find_best(uint32_t freq)
 {

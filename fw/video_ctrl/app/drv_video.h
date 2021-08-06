@@ -172,7 +172,7 @@ public:
         m_vregs.bt[VREG_PRESENT] = 0;
         get_vreg(VREG_PRESENT, 1);
         #ifdef DEBUG
-        xprintf("Readed value: 0x%x\n", m_vregs.bt[VREG_PRESENT]);
+        //xprintf("Readed value: 0x%x\n", m_vregs.bt[VREG_PRESENT]);
         #endif
         return (m_vregs.bt[VREG_PRESENT] == 0x5a);
     }

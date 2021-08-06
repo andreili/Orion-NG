@@ -88,29 +88,31 @@ void App::preinit_periph()
         EPeriph::APB2_USART1 | APB2_SPI1, true);
 
     gpioa.init(GPIOA);
+    gpiob.init(GPIOB);
     // USBEN pin
     gpioa.init_pins(EGPIOPins::PIN_8, EGPIOMode::OUTPUT_PP, EGPIOPull::PULLDOWN, EGPIOSpeed::HIGH);
     // USART1 pins
     gpioa.init_pins(EGPIOPins::PIN_9, EGPIOMode::AF_PP, EGPIOPull::NOPULL, EGPIOSpeed::HIGH);
     gpioa.init_pins(EGPIOPins::PIN_10, EGPIOMode::INPUT, EGPIOPull::NOPULL, EGPIOSpeed::HIGH);
 
-    gpiob.init(GPIOB);
     // I2C1 and I2C2 pins
-    gpiob.init_pins(EGPIOPins::PIN_8 | EGPIOPins::PIN_9 | EGPIOPins::PIN_10 | EGPIOPins::PIN_11,
+    gpiob.init_pins(EGPIOPins::PIN_6 | EGPIOPins::PIN_7 | EGPIOPins::PIN_10 | EGPIOPins::PIN_11,
         EGPIOMode::AF_OD, EGPIOPull::NOPULL, EGPIOSpeed::HIGH);
     // SPI1 pins
     /*gpioa.init_pins(EGPIOPins::PIN_5, EGPIOMode::INPUT, EGPIOPull::NOPULL, EGPIOSpeed::HIGH);
     gpioa.init_pins(EGPIOPins::PIN_4 | EGPIOPins::PIN_6 | EGPIOPins::PIN_7, EGPIOMode::AF_PP,
         EGPIOPull::NOPULL, EGPIOSpeed::HIGH);*/
-    gpiob.init_pins(EGPIOPins::PIN_4, EGPIOMode::INPUT, EGPIOPull::NOPULL, EGPIOSpeed::HIGH);
-    gpiob.init_pins(EGPIOPins::PIN_3 | EGPIOPins::PIN_5, EGPIOMode::AF_PP, EGPIOPull::NOPULL, EGPIOSpeed::HIGH);
-    gpioa.init_pins(EGPIOPins::PIN_15, EGPIOMode::OUTPUT_PP, EGPIOPull::PULLUP, EGPIOSpeed::HIGH);
+    gpioa.init_pins(EGPIOPins::PIN_6, EGPIOMode::INPUT, EGPIOPull::NOPULL, EGPIOSpeed::HIGH);
+    gpioa.init_pins(EGPIOPins::PIN_5 | EGPIOPins::PIN_7, EGPIOMode::AF_PP, EGPIOPull::NOPULL, EGPIOSpeed::HIGH);
+    gpioa.init_pins(EGPIOPins::PIN_3, EGPIOMode::OUTPUT_PP, EGPIOPull::PULLUP, EGPIOSpeed::HIGH);
 
-    gpioa.pin_UP(EGPIOPins::PIN_15);
+    gpioa.pin_UP(EGPIOPins::PIN_3);
+
+    // GPIO
+    gpioa.init_pins(EGPIOPins::PIN_0, EGPIOMode::OUTPUT_PP, EGPIOPull::PULLUP, EGPIOSpeed::HIGH);
+    gpioa.pin_UP(EGPIOPins::PIN_0);
 
     CAFIO::remap_swj_nojtag();
-    CAFIO::remap_i2c1();
-    CAFIO::remap_spi1();
 }
 
 void App::init_periph()
@@ -208,16 +210,13 @@ status_e cmd_dump_vreg(uint32_t argc, char * const argv[])
     spi_tx_buf[0] = (0 << 7) | 0;
     spi_tx_buf[1] = size;
 
-    gpioa.pin_DOWN(EGPIOPins::PIN_15);
-    CRCC::set_clk_APB1_enabled(EPeriph::APB1_I2C1, false);
+    gpioa.pin_DOWN(EGPIOPins::PIN_3);
     if (!spi1.transmit_receive(spi_tx_buf, spi_rx_buf, size + 2, 1000))
     {
-        gpioa.pin_UP(EGPIOPins::PIN_15);
-        CRCC::set_clk_APB1_enabled(EPeriph::APB1_I2C1, true);
+        gpioa.pin_UP(EGPIOPins::PIN_3);
         return STATUS_FAIL;
     }
-    gpioa.pin_UP(EGPIOPins::PIN_15);
-    CRCC::set_clk_APB1_enabled(EPeriph::APB1_I2C1, true);
+    gpioa.pin_UP(EGPIOPins::PIN_3);
 
     xprintf("Received data\n");
     for (uint32_t i=0 ; i<(size+2) ; ++i)
@@ -233,6 +232,20 @@ status_e cmd_dump_vreg(uint32_t argc, char * const argv[])
 }
 
 SHELL_COMMAND(dump_vreg, "", cmd_dump_vreg);
+
+status_e cmd_fpga_reset(uint32_t argc, char * const argv[])
+{
+    (void)(argc);
+    (void)(argv);
+    gpioa.pin_DOWN(EGPIOPins::PIN_0);
+    uint32_t delay_to = Utils::get_tick() + 1;
+    while (delay_to > Utils::get_tick());
+    gpioa.pin_UP(EGPIOPins::PIN_0);
+    CEDIDCtrl::reset();
+    return STATUS_OK;
+}
+
+SHELL_COMMAND(fpga_reset, "", cmd_fpga_reset);
 
 extern "C"
 {
