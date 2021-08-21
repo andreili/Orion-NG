@@ -85,7 +85,7 @@ void CVideo::get_vreg(uint32_t from_addr, uint32_t count)
 
     gpioa.pin_DOWN(EGPIOPins::PIN_3);
     // disable I2C1 clock - see ERRATA for STM32F103 medium density devices (ES096)
-    spi1.transmit_receive(tx_buf, rx_buf, count + 3, 1000);
+    spi1.transmit_receive(tx_buf, rx_buf, count + 2, 1000);
     memcpy(&m_vregs.bt[from_addr], &rx_buf[2], count);
     gpioa.pin_UP(EGPIOPins::PIN_3);
 }
