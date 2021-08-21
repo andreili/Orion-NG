@@ -7,8 +7,8 @@ void CSPI::init(SPI_TypeDef* base)
     disable();
     WRITE_REG32(&m_base->CR1, 
         (SPI_CR1_MSTR | SPI_CR1_SSI) | // mode - master
-        SPI_CR1_BR_1); // baud prescaler - 8
-        //SPI_CR1_BR_2); // baud prescaler - 32
+        //SPI_CR1_BR_1); // baud prescaler - 8
+        SPI_CR1_BR_2); // baud prescaler - 32
         //SPI_CR1_BR_2); // baud prescaler - 32
     WRITE_REG32(&m_base->CR2, SPI_CR2_SSOE);
 }
