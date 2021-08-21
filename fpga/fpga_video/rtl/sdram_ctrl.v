@@ -2,16 +2,17 @@ module sdram_ctrl
 #(
 	parameter	SDRAM_MHZ   			= 133,
 	parameter	SDRAM_DATA_W 			= 16,
-	parameter	SDRAM_ADDR_W 			= 22,
-	parameter	SDRAM_COL_W 			= 8,
+	parameter	SDRAM_ADDR_W 			= 23,
+	parameter	SDRAM_COL_W 			= 9,
 	parameter	SDRAM_BANK_W 			= 2,
 	parameter  	SDRAM_BANKS          = 2 ** SDRAM_BANK_W,
 	parameter   SDRAM_ROW_W          = SDRAM_ADDR_W - SDRAM_COL_W - SDRAM_BANK_W,
 	parameter   SDRAM_REFRESH_CNT    = 2 ** SDRAM_ROW_W,
-	parameter   SDRAM_START_DELAY    = (100 * SDRAM_MHZ), // 100uS
+	//parameter   SDRAM_START_DELAY    = (100 * SDRAM_MHZ), // 100uS
 	parameter   SDRAM_REFRESH_CYCLES = (64000*SDRAM_MHZ) / SDRAM_REFRESH_CNT-1,
 	parameter   SDRAM_READ_LATENCY   = 2,
 	parameter	SDRAM_T_RP				= 3,
+	parameter	SDRAM_T_WR				= 4,
 	parameter	SDRAM_T_RFC				= 9,
 	parameter	SDRAM_T_MRD				= 2,
 	parameter	SDRAM_T_RCD				= 3
@@ -30,7 +31,7 @@ module sdram_ctrl
 	output	wire			o_CASn,
 	output	wire			o_RASn,
 	input		wire			i_fifo_empty,
-	input		wire[24:0]	i_fifo_data,
+	input		wire[28:0]	i_fifo_data,
 	output	wire			o_fifo_read,
 	input		wire[7:0]	i_line_idx,
 	input		wire			i_line_end,
@@ -78,14 +79,12 @@ module sdram_ctrl
 	localparam STATE_READ        = STATE_REFRESH_NOP + 1;
 	localparam STATE_READ_NOP    = STATE_READ + 1;
 	localparam STATE_READ_DATA   = STATE_READ_NOP + 1;
-	localparam STATE_WRITE       = STATE_READ_DATA + 1;
+	localparam STATE_READ_END    = STATE_READ_DATA + 1;
+	localparam STATE_WRITE       = STATE_READ_END + 1;
 	localparam STATE_WRITE_NOP   = STATE_WRITE + 1;
 	localparam STATE_PRECHARGE   = STATE_WRITE_NOP + 1;
-
-	localparam AUTO_PRECHARGE    = 10;
-	localparam ALL_BANKS         = 10;
 	
-	localparam WAIT_WIDTH		  = 14;
+	localparam WAIT_WIDTH		  = 5;
 	localparam REFR_WIDTH		  = 12;
 
 	reg[(CMD_W-1):0]			r_cmd;
@@ -122,11 +121,14 @@ module sdram_ctrl
 	reg							r_write_low;
 	reg[7:0]						r_wr_data;
 	reg							r_fifo_next;
+	reg[15:0]					r_dq;
+	reg							r_fifo_empty;
 
 	always @(posedge i_clk)
 	begin
 		r_line_end <= i_line_end;
 		r_line_end_prev <= r_line_end;
+		r_fifo_empty <= i_fifo_empty;
 	end
 
 	always @(posedge i_clk)
@@ -146,7 +148,7 @@ module sdram_ctrl
 		begin
 			r_state <= STATE_INIT_PRECH;
 			r_cmd <= CMD_NOP;
-			r_wait <= SDRAM_START_DELAY;
+			r_wait <= { WAIT_WIDTH{1'b0} };
 			r_dqm <= 2'b11;
 			r_refr_reset <= 1'b0;
 			r_fifo_next <= 1'b0;
@@ -161,7 +163,7 @@ module sdram_ctrl
 			begin
 				r_state <= STATE_INIT_NOP1;
 				r_cmd <= CMD_PRECHARGE;
-				r_addr[AUTO_PRECHARGE] <= 1'b1;
+				r_addr[10] <= 1'b1;
 				r_ba <= 2'b00;
 			end
 		STATE_INIT_NOP1:
@@ -208,70 +210,51 @@ module sdram_ctrl
 			end
 		STATE_IDLE:
 			begin
+				r_cmd <= CMD_NOP;
 				o_vdata_valid <= 1'b0;
 				r_dqm <= 2'b11;
 				if (w_refr_req == 1'b1)
 					r_state <= STATE_REFRESH;
 				else if (r_vdata_req == 1'b1)
-					r_state <= STATE_PRECH;
-				else if (i_fifo_empty== 1'b0)
 				begin
-					r_state <= STATE_PRECH;
-					r_fifo_next <= 1'b1;
-				end
-				r_addr <= { 12{1'b0} };
-			end
-		STATE_PRECH:
-			begin
-				r_state <= STATE_PRECH_NOP;
-				r_cmd <= CMD_PRECHARGE;
-				r_addr[AUTO_PRECHARGE] <= 1'b1;
-				r_ba <= 2'b00;
-				r_fifo_next <= 1'b0;
-			end
-		STATE_PRECH_NOP:
-			begin
-				r_state <= STATE_ACTIVATE;
-				r_cmd <= CMD_NOP;
-				r_wait <= (SDRAM_T_RP - 1);
-				r_addr <= { 12{1'b0} };
-				if (r_vdata_req == 1'b1)
-				begin
-					r_addr_tmp <= { {6{1'b0}}, r_video_addr[15], r_video_addr[7:0], r_video_addr[13:8], r_video_addr[14] };
+					r_state <= STATE_ACTIVATE;
+					r_addr_tmp <= { {7{1'b0}}, r_video_addr[15], r_video_addr[7:0], r_video_addr[13:8], r_video_addr[14] };
 					r_col_cnt <= 4'd15;
 				end
-					else
+				else if (r_fifo_empty== 1'b0)
 				begin
+					r_state <= STATE_ACTIVATE;
 					r_write_low <= i_fifo_data[24];
-					r_addr_tmp <= { {6{1'b0}}, i_fifo_data[23], i_fifo_data[15:8], i_fifo_data[21:16], i_fifo_data[22] };
+					r_addr_tmp <= { {3{1'b0}}, i_fifo_data[27:24], i_fifo_data[23], i_fifo_data[15:8], i_fifo_data[21:16], i_fifo_data[22] };
 					r_wr_data <= i_fifo_data[7:0];
 				end
+				r_addr <= { SDRAM_ROW_W{1'b0} };
 			end
 		STATE_ACTIVATE:
 			begin
 				r_state <= STATE_ACTIVATE_NOP;
 				r_cmd <= CMD_ACTIVE;
-				r_addr <= r_addr_tmp[(SDRAM_ADDR_W-1-2)-:12];
-				r_ba <= r_addr_tmp[(SDRAM_ADDR_W-1)-:2];
+				r_addr <= r_addr_tmp[(SDRAM_ADDR_W-1-2)-:SDRAM_ROW_W];
+				r_ba <= r_addr_tmp[(SDRAM_ADDR_W-1)-:SDRAM_BANK_W];
 			end
 		STATE_ACTIVATE_NOP:
 			begin
-				r_cmd <= CMD_NOP;
 				if (r_vdata_req == 1'b1)
 					r_state <= STATE_READ;
 				else
+				begin
 					r_state <= STATE_WRITE;
+					r_dq <= { r_wr_data, r_wr_data };
+				end
+				r_cmd <= CMD_NOP;
 				r_wait <= SDRAM_T_RCD;
 			end
 		STATE_READ:
 			begin
 				r_state <= STATE_READ_NOP;
 				r_cmd <= CMD_READ;
-				r_addr[11] <= 1'b0;
-				r_addr[10] <= 1'b1;
-				r_addr[9]  <= 1'b0;
-				r_addr[8]  <= 1'b0;
-				r_addr[7:0] <= r_addr_tmp[7:0];
+				r_addr[(SDRAM_ROW_W-1):SDRAM_COL_W] <= { (SDRAM_ROW_W-SDRAM_COL_W){1'b0} };
+				r_addr[(SDRAM_COL_W-1):0] <= r_addr_tmp[(SDRAM_COL_W-1):0];
 				o_vdata_valid <= 1'b0;
 				r_dqm <= 2'b00;
 			end
@@ -285,29 +268,57 @@ module sdram_ctrl
 		STATE_READ_DATA:
 			begin
 				if (r_col_cnt == 8'd0)
-					r_state <= STATE_IDLE;
+					r_state <= STATE_READ_END;
 				else
 					r_state <= STATE_READ;
 				r_col_cnt <= r_col_cnt - 1'b1;
 				r_wait <= 7;
 				o_vdata_valid <= 1'b1;
 			end
+		STATE_READ_END:
+			begin
+				r_cmd <= CMD_TERMINATE;
+				o_vdata_valid <= 1'b0;
+				r_state <= STATE_PRECH;
+			end
 		STATE_WRITE:
 			begin
 				r_state <= STATE_WRITE_NOP;
 				r_cmd <= CMD_WRITE;
-				r_addr[11] <= 1'b0;
-				r_addr[10] <= 1'b1;
-				r_addr[9]  <= 1'b0;
-				r_addr[8]  <= 1'b0;
-				r_addr[7:0] <= r_addr_tmp[7:0];
-				r_dqm <= { r_write_low, r_write_low };
+				r_addr[(SDRAM_ROW_W-1):SDRAM_COL_W] <= { (SDRAM_ROW_W-SDRAM_COL_W){1'b0} };
+				r_addr[(SDRAM_COL_W-1):0] <= r_addr_tmp[(SDRAM_COL_W-1):0];
+				r_dqm <= { !r_write_low, r_write_low };
+				r_dq <= { r_wr_data, r_wr_data };
+				r_fifo_next <= 1'b1;
 			end
 		STATE_WRITE_NOP:
 			begin
+				r_state <= STATE_PRECH;
+				r_cmd <= CMD_NOP;
+				r_addr[(SDRAM_ROW_W-1):0] <= { (SDRAM_ROW_W){1'b0} };
+				r_ba <= 2'b00;
+				r_dqm <= 2'b11;
+				r_dq <= { 16{1'bZ} };
+				r_wait <= (SDRAM_T_WR - 1);
+				r_fifo_next <= 1'b0;
+			end
+		STATE_PRECH:
+			begin
+				r_state <= STATE_PRECH_NOP;
+				r_cmd <= CMD_PRECHARGE;
+				r_addr[(SDRAM_ROW_W-1):11] <= { (SDRAM_ROW_W-11){1'b0} };
+				r_addr[10] <= 1'b1;
+				r_addr[9:0] <= { 10{1'b0} };
+				r_ba <= 2'b00;
+				r_dqm <= 2'b11;
+				r_dq <= { 16{1'bZ} };
+			end
+		STATE_PRECH_NOP:
+			begin
 				r_state <= STATE_IDLE;
 				r_cmd <= CMD_NOP;
-				r_dqm <= 2'b11;
+				r_wait <= (SDRAM_T_RP - 1);
+				r_addr <= { SDRAM_ROW_W{1'b0} };
 			end
 		STATE_REFRESH:
 			begin
@@ -338,6 +349,6 @@ module sdram_ctrl
 	assign o_vdata_reset = r_vdata_req;
 	assign o_fifo_read = r_fifo_next;
 	
-	assign io_dq = (r_state == STATE_WRITE_NOP) ? { r_wr_data, r_wr_data } : 16'hZZZZ;
+	assign io_dq = r_dq;
 
 endmodule

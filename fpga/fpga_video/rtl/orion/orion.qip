@@ -1,0 +1,4 @@
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "orion.v"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "orion_port_decoder.v"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "orion_video_ports.v"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "orion_mem_ports.v"]

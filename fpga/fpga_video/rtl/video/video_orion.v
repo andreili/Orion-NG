@@ -43,18 +43,18 @@ module video_orion
 	reg[11:0]	r_y;
 	reg[11:0]	r_x;
 	reg[11:0]	r_x_pre;
-	reg			r_x_is_active, r_y_is_active;
+	//reg			r_x_is_active, r_y_is_active;
 	
 	wire			w_x_is_active = (r_x >= 0) & (r_x < w_x_size);
 	wire			w_y_is_active = (r_y >= 0) & (r_y < w_y_size);
-	wire			w_is_active = r_x_is_active & r_y_is_active;
+	wire			w_is_active = w_x_is_active & w_y_is_active;
 
 	always @(posedge i_clk)
 	begin
 		r_x <= w_x_actual;
-		r_x_pre <= w_x_actual + 1'b1;
-		r_x_is_active <= w_x_is_active;
-		r_y_is_active <= w_y_is_active;
+		r_x_pre <= w_x_actual + 3'd7;
+		//r_x_is_active <= w_x_is_active;
+		//r_y_is_active <= w_y_is_active;
 		if (i_line_end == 1'b1)
 		begin
 			r_y <= w_y_actual;
@@ -64,22 +64,39 @@ module video_orion
 
 
 
-	assign o_line_idx = r_y[10:3];
-	assign o_column = r_x_pre[10:3];
+	assign o_line_idx = r_y[7:0];
+	assign o_column = r_x_pre[8:3];
 
 ///////
-	wire w_clk = w_x_is_double ? i_clk2 : i_clk;
+	wire w_clk = w_x_is_double ? (~i_clk2) : i_clk;
 	reg[7:0]	r_col0;
+	//reg		r_out;
 	always @(posedge w_clk)
 	begin
-		if (r_x[3] == 1'b1)
+		if (r_x[2:0] == 3'b111)
+		begin
 			r_col0 <= i_vdata[7:0];
-		else
+		end
+			else
+		begin
 			r_col0 <= { 1'b0, r_col0[7:1] };
+		end
+		//r_out <= r_col0[0];
 	end
 
-	assign o_r = /*w_is_active ? r_x[7:0] :*/ 8'h00;
-	assign o_g = w_is_active ? /*r_y[7:0]*/ {8{r_col0[0]}} : 8'h00;
-	assign o_b = /*w_is_active ? { r_y[11:8], r_x[11:8] } :*/ 8'h00;
+	reg[7:0]	r_red;
+	reg[7:0]	r_green;
+	reg[7:0]	r_blue;
+
+	always @(posedge w_clk)
+	begin
+		r_red <= /*w_is_active ? r_x[7:0] :*/ 8'h00;
+		r_green <= w_is_active ? /*r_y[7:0]*/ {8{r_col0[0]}} : 8'h00;
+		r_blue <= /*w_is_active ? { r_y[11:8], r_x[11:8] } :*/ 8'h00;
+	end
+
+	assign o_r = r_red;
+	assign o_g = r_green;
+	assign o_b = r_blue;
 
 endmodule

@@ -40,7 +40,16 @@ rescue-backup
 *.logdb
 *.rdb
 *.db_info
-db/*
+*db*
+*greybox_tmp*
+*output_files*
+*simulation*
+*.tdf
+*.kpt
+*.bpm
+*.ddb
+*.nvd
+*.idb
 out/*
 
 fw/video_ctrl/out/*
