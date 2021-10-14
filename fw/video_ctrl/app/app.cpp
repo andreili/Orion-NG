@@ -13,6 +13,7 @@
 #include "edid_ctrl.h"
 #include "drv_video.h"
 #include "drv_pll.h"
+#include "drv_vcap.h"
 //#include "usbd.h"
 //#include "usbd_cdc.h"
 #ifdef DEBUG
@@ -53,6 +54,7 @@ void App::entry_point()
     CVideo::init();
     CPLL::init();
     CEDIDCtrl::init();
+    CVcap::init();
 
 #ifdef DEBUG
     shell.init("VideoCTRL");
@@ -99,9 +101,6 @@ void App::preinit_periph()
     gpiob.init_pins(EGPIOPins::PIN_6 | EGPIOPins::PIN_7 | EGPIOPins::PIN_10 | EGPIOPins::PIN_11,
         EGPIOMode::AF_OD, EGPIOPull::NOPULL, EGPIOSpeed::HIGH);
     // SPI1 pins
-    /*gpioa.init_pins(EGPIOPins::PIN_5, EGPIOMode::INPUT, EGPIOPull::NOPULL, EGPIOSpeed::HIGH);
-    gpioa.init_pins(EGPIOPins::PIN_4 | EGPIOPins::PIN_6 | EGPIOPins::PIN_7, EGPIOMode::AF_PP,
-        EGPIOPull::NOPULL, EGPIOSpeed::HIGH);*/
     gpioa.init_pins(EGPIOPins::PIN_6, EGPIOMode::INPUT, EGPIOPull::NOPULL, EGPIOSpeed::HIGH);
     gpioa.init_pins(EGPIOPins::PIN_5 | EGPIOPins::PIN_7, EGPIOMode::AF_PP, EGPIOPull::NOPULL, EGPIOSpeed::HIGH);
     gpioa.init_pins(EGPIOPins::PIN_3, EGPIOMode::OUTPUT_PP, EGPIOPull::PULLUP, EGPIOSpeed::HIGH);
@@ -109,8 +108,8 @@ void App::preinit_periph()
     gpioa.pin_UP(EGPIOPins::PIN_3);
 
     // GPIO
-    gpioa.init_pins(EGPIOPins::PIN_0, EGPIOMode::OUTPUT_PP, EGPIOPull::PULLUP, EGPIOSpeed::HIGH);
-    gpioa.pin_UP(EGPIOPins::PIN_0);
+    gpiob.init_pins(EGPIOPins::PIN_9, EGPIOMode::OUTPUT_PP, EGPIOPull::PULLUP, EGPIOSpeed::HIGH);
+    gpiob.pin_UP(EGPIOPins::PIN_9);
 
     CAFIO::remap_swj_nojtag();
 }
@@ -237,10 +236,10 @@ status_e cmd_fpga_reset(uint32_t argc, char * const argv[])
 {
     (void)(argc);
     (void)(argv);
-    gpioa.pin_DOWN(EGPIOPins::PIN_0);
+    gpiob.pin_DOWN(EGPIOPins::PIN_9);
     uint32_t delay_to = Utils::get_tick() + 1;
     while (delay_to > Utils::get_tick());
-    gpioa.pin_UP(EGPIOPins::PIN_0);
+    gpiob.pin_UP(EGPIOPins::PIN_9);
     CEDIDCtrl::reset();
     return STATUS_OK;
 }
