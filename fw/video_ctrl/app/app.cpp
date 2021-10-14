@@ -13,6 +13,7 @@
 #include "edid_ctrl.h"
 #include "drv_video.h"
 #include "drv_pll.h"
+#include "drv_vcap.h"
 //#include "usbd.h"
 //#include "usbd_cdc.h"
 #ifdef DEBUG
@@ -53,6 +54,7 @@ void App::entry_point()
     CVideo::init();
     CPLL::init();
     CEDIDCtrl::init();
+    CVcap::init();
 
 #ifdef DEBUG
     shell.init("VideoCTRL");

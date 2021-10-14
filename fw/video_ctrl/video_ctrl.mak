@@ -17,6 +17,7 @@ OBJS += task_mgr.o
 OBJS += edid_ctrl.o
 OBJS += drv_video.o
 OBJS += drv_pll.o
+OBJS += drv_vcap.o
 
 #OBJS += usbd.o
 #OBJS += usbd_descr.o
