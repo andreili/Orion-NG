@@ -125,8 +125,8 @@ void App::init_periph()
     uart1.recv_start_IT();
 #endif
 
-    i2c1.init(I2C1, 100 * 1000, EI2CDuty::CYCLE_2);
-    i2c2.init(I2C2, 100 * 1000, EI2CDuty::CYCLE_2);
+    i2c1.init(I2C1, 400 * 1000, EI2CDuty::CYCLE_2);
+    i2c2.init(I2C2, 400 * 1000, EI2CDuty::CYCLE_2);
 
     spi1.init(SPI1);
 
