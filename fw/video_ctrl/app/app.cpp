@@ -249,6 +249,34 @@ status_e cmd_fpga_reset(uint32_t argc, char * const argv[])
 
 SHELL_COMMAND(fpga_reset, "", cmd_fpga_reset);
 
+status_e cmd_m_wr(uint32_t argc, char * const argv[])
+{
+    if (argc != 3)
+    {
+        return STATUS_INV_PAR;
+    }
+    uint32_t addr = Shell::get_num(argv[1]);
+    uint32_t data = Shell::get_num(argv[2]);
+    WRITE_REG32(addr, data);
+    return STATUS_OK;
+}
+
+SHELL_COMMAND(m_wr, "[addr (based on 4 bytes)] [data]", cmd_m_wr);
+
+status_e cmd_m_rd(uint32_t argc, char * const argv[])
+{
+    if (argc != 2)
+    {
+        return STATUS_INV_PAR;
+    }
+    uint32_t addr = Shell::get_num(argv[1]);
+    uint32_t data = READ_REG32(addr);
+    xprintf("Readed data: 0x%x\n", data);
+    return STATUS_OK;
+}
+
+SHELL_COMMAND(m_rd, "[addr (based on 4 bytes)]", cmd_m_rd);
+
 extern "C"
 {
     static uint8_t *__sbrk_heap_end = NULL;
