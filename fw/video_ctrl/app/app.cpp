@@ -14,6 +14,7 @@
 #include "drv_video.h"
 #include "drv_pll.h"
 #include "drv_vcap.h"
+#include "display.h"
 //#include "usbd.h"
 //#include "usbd_cdc.h"
 #ifdef DEBUG
@@ -31,6 +32,8 @@ CI2C i2c2;
 CSPI spi1;
 //CUSBD usbd_HS;
 //CUSBDCDC usb_cdc;
+
+static uint8_t disp_data[(SSD1306_WIDTH * SSD1306_HEIGHT / 8) + 1];
 
 #ifdef DEBUG
 void xfunc_out(unsigned char ch)
@@ -51,15 +54,18 @@ void App::entry_point()
     init_periph();
 
     CTaskMgr::init();
-    CVideo::init();
-    CPLL::init();
-    CEDIDCtrl::init();
-    CVcap::init();
 
 #ifdef DEBUG
     shell.init("VideoCTRL");
 #endif
     CORTEX::enable_irq();
+
+    CVideo::init();
+    CPLL::init();
+    CEDIDCtrl::init();
+    CVcap::init();
+    Display::init(disp_data);
+    Display::clear();
 
     while (1)
     {
@@ -71,6 +77,7 @@ void App::entry_point()
         }
     #endif
         CTaskMgr::run();
+        Display::update();
     }
 }
 
