@@ -67,6 +67,16 @@ void App::entry_point()
     Display::init(disp_data);
     Display::clear();
 
+    Display::draw_h_line(0, SSD1306_WIDTH - 1, 0, 1);
+    Display::draw_string(10, 2, "Main menu");
+    Display::draw_h_line(0, SSD1306_WIDTH - 1, 8+2, 1);
+    Display::draw_h_line(0, SSD1306_WIDTH - 1, SSD1306_HEIGHT - 1, 1);
+    
+    Display::draw_v_line(0, 0, SSD1306_HEIGHT - 1, 1);
+    Display::draw_v_line(SSD1306_WIDTH - 1, 0, SSD1306_HEIGHT - 1, 1);
+    
+    //Display::draw_h_line(0, SSD1306_WIDTH - 1, 7, 2);
+
     while (1)
     {
     #ifdef DEBUG

@@ -106,7 +106,7 @@ void Display::draw_char(uint32_t x, uint32_t y, char ch)
     }
 }
 
-void Display::draw_string(uint32_t x, uint32_t y, char *p_str)
+void Display::draw_string(uint32_t x, uint32_t y, const char *p_str)
 {
     size_t len = strlen(p_str);
     for (size_t i=0 ; i<len ; ++i)

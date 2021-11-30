@@ -36,6 +36,9 @@ OBJS += drv_spi.o
 #OBJS += xprintf.o
 
 INC += app/
+INC += app/gui
+INC += app/hw
+INC += app/interfaces
 INC += drv/
 INC += core/
 #INC += hal/

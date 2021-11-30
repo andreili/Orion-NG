@@ -16,7 +16,7 @@ public:
     static void update();
     static void set_inverted(bool val) { m_inverted = val; }
     static void draw_char(uint32_t x, uint32_t y, char ch);
-    static void draw_string(uint32_t x, uint32_t y, char *p_str);
+    static void draw_string(uint32_t x, uint32_t y, const char *p_str);
     static void draw_h_line(uint32_t x0, uint32_t x1, uint32_t y, uint32_t pitch);
     static void draw_v_line(uint32_t x, uint32_t y0, uint32_t y1, uint32_t pitch);
 private:

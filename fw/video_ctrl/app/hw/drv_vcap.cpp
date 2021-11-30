@@ -6,6 +6,10 @@
 #include "shell.h"
 #endif
 
+/*
+    Orion-128/PRO - 138 512 25 256 1 1 1
+*/
+
 #define BUF_SIZE (sizeof(vcap_regs_t) + 2)
 
 #define VCAP_CTRL_BASE_ADDR 0x40
