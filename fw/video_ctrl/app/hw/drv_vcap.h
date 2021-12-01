@@ -1,10 +1,13 @@
 #pragma once
 #include <cstdint>
+#include "hil.h"
 
 #define VREG_RSEN 9
 #define VREG_ACTIVE 12
 #define VREG_PRESENT 16
 #define TFP_ADDR 0x7e
+
+#define VCAP_CTRL_BASE_ADDR 0x40
 
 #pragma pack(push, 1)
 typedef union
@@ -28,7 +31,10 @@ class CVcap
 {
 public:
     static void init();
-    static void set_regs();
+    static inline void set_regs()
+    {
+        HIL::pl_set_registers(VCAP_CTRL_BASE_ADDR, &m_regs.bt[0], sizeof(vcap_regs_t));
+    }
 
     static void set_x_start(uint32_t val) { m_regs.x_start = val; }
     static void set_x_size(uint32_t val) { m_regs.x_size = val; }

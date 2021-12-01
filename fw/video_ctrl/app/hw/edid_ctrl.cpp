@@ -1,7 +1,7 @@
 #include "core.h"
 #include "edid_ctrl.h"
 #include "task_mgr.h"
-#include "drv_i2c.h"
+#include "hil.h"
 #include <string.h>
 #include "xprintf.h"
 #include "drv_video.h"
@@ -328,8 +328,6 @@ void CEDIDCtrl::parse_info()
     #endif
 }
 
-extern CI2C i2c1;
-
 void CEDIDCtrl::periodic_rescan()
 {
     if (!CVideo::is_video_present())
@@ -338,44 +336,39 @@ void CEDIDCtrl::periodic_rescan()
         return;
     }
 
-    uint32_t offset = 0;
-    if (i2c1.master_transmit(EDID_ADDR_VGA, (uint8_t*)&offset, 1, 1000, true))
+    if (!HIL::get_edid(EDID_ADDR_VGA, 0, m_buf, EDID_DATA_SIZE))
     {
-        if (i2c1.master_receive(EDID_ADDR_VGA, m_buf, EDID_DATA_SIZE, 1000))
-        {
-            if (m_serial[0] == 0)
-            {
-                // VGA is now connected, scan all infos
-                parse_info();
-            #ifdef DEBUG
-            #endif
-                if (CVideo::get_dvi_present())
-                {
-                #ifdef DEBUG
-                    xprintf("Connected DVI/HDMI display '%s'\n", m_serial);
-                #endif
-                    CVideo::enable_hdmi();
-                }
-                else
-                {
-                #ifdef DEBUG
-                    xprintf("Connected VGA display '%s'\n", m_serial);
-                #endif
-                    CVideo::enable_vga();
-                }
-                CVideo::enable_video();
-            }
-            return;
-        }
+        CVideo::disable_video();
+        m_serial[0] = 0;
+        //CORE::reg_write(&p_vctrl_reg->CTRL, 0);
+    #ifdef DEBUG
+        xprintf("No dispay connected\n");
+    #endif
+        return;
     }
 
-
-    CVideo::disable_video();
-    m_serial[0] = 0;
-    //CORE::reg_write(&p_vctrl_reg->CTRL, 0);
-#ifdef DEBUG
-    xprintf("No dispay connected\n");
-#endif
+    if (m_serial[0] == 0)
+    {
+        // VGA is now connected, scan all infos
+        parse_info();
+    #ifdef DEBUG
+    #endif
+        if (CVideo::get_dvi_present())
+        {
+        #ifdef DEBUG
+            xprintf("Connected DVI/HDMI display '%s'\n", m_serial);
+        #endif
+            CVideo::enable_hdmi();
+        }
+        else
+        {
+        #ifdef DEBUG
+            xprintf("Connected VGA display '%s'\n", m_serial);
+        #endif
+            CVideo::enable_vga();
+        }
+        CVideo::enable_video();
+    }
 }
 
 

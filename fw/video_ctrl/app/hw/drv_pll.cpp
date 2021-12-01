@@ -1,7 +1,5 @@
 #include "drv_pll.h"
-#include "drv_spi.h"
-#include "drv_gpio.h"
-#include "drv_rcc.h"
+#include "hil.h"
 #include "xprintf.h"
 #ifdef DEBUG
 #include "shell.h"
@@ -11,9 +9,6 @@
 
 #define PLL_CTRL_BASE_ADDR 0x20
 #define PLL_UPDATE_OFFSET 0x11
-
-extern CGPIO gpioa;
-extern CSPI spi1;
 
 typedef union
 {
@@ -113,11 +108,6 @@ void CPLL::set_freq(uint32_t freq)
     update_pll();
 }
 
-#define BUF_SIZE 20
-
-static uint8_t tx_buf[BUF_SIZE];
-static uint8_t rx_buf[BUF_SIZE];
-
 void CPLL::set_pll_regs()
 {
     pll_regs_t  regs =
@@ -125,26 +115,12 @@ void CPLL::set_pll_regs()
      /* c  r  vco cp                     N       M       C0       C1  C2  C3  C4 */
         0, 27, 0, 0, CALC_PLL_CONST(_pll_n, _pll_m,  _pll_c,  _pll_c*2,  0,  0,  0)
     };
-
-    uint32_t size = 17;
-    tx_buf[0] = (1 << 7) | (PLL_CTRL_BASE_ADDR);
-    tx_buf[1] = size;
-
-    gpioa.pin_DOWN(EGPIOPins::PIN_3);
-    memcpy(&tx_buf[2], &regs.dw[0], size);
-    spi1.transmit_receive(tx_buf, rx_buf, size + 2, 1000);
-    gpioa.pin_UP(EGPIOPins::PIN_3);
+    HIL::pl_set_registers(PLL_CTRL_BASE_ADDR, reinterpret_cast<uint8_t*>(&regs.dw[0]), 17);
 }
 
 void CPLL::update_pll()
 {
-    uint32_t size = 1;
-    tx_buf[0] = (1 << 7) | (PLL_CTRL_BASE_ADDR + PLL_UPDATE_OFFSET);
-    tx_buf[1] = size;
-
-    gpioa.pin_DOWN(EGPIOPins::PIN_3);
-    spi1.transmit_receive(tx_buf, rx_buf, size + 2, 1000);
-    gpioa.pin_UP(EGPIOPins::PIN_3);
+    HIL::pl_set_registers(PLL_CTRL_BASE_ADDR + PLL_UPDATE_OFFSET, nullptr, 1);
 }
 
 #define PLL_MAX_N 512

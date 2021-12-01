@@ -1,12 +1,14 @@
 #pragma once
 
 #include <cstdint>
-#include "xprintf.h"
+#include "hil.h"
 
 #define VREG_RSEN 9
 #define VREG_ACTIVE 12
 #define VREG_PRESENT 16
 #define TFP_ADDR 0x7e
+
+#define VIDEO_CTRL_BASE_ADDR 0
 
 #pragma pack(push, 1)
 typedef union
@@ -171,16 +173,25 @@ public:
     {
         m_vregs.bt[VREG_PRESENT] = 0;
         get_vreg(VREG_PRESENT, 1);
-        #ifdef DEBUG
-        //xprintf("Readed value: 0x%x\n", m_vregs.bt[VREG_PRESENT]);
-        #endif
         return (m_vregs.bt[VREG_PRESENT] == 0x5a);
     }
 private:
     static video_ctrl_t     m_vregs;
     static hdmi_regs_r      m_hdmi;
-    static void get_vreg(uint32_t from_addr, uint32_t count);
-    static void set_vreg(uint32_t from_addr, uint32_t count);
-    static bool get_hreg(uint32_t from, uint32_t count);
-    static bool set_hreg(uint32_t from, uint32_t count);
+    static inline void get_vreg(uint32_t from_addr, uint32_t count)
+    {
+        HIL::pl_get_registers(from_addr + VIDEO_CTRL_BASE_ADDR, &m_vregs.bt[from_addr], count);
+    }
+    static inline void set_vreg(uint32_t from_addr, uint32_t count)
+    {
+        HIL::pl_set_registers(from_addr + VIDEO_CTRL_BASE_ADDR, &m_vregs.bt[from_addr], count);
+    }
+    static inline bool get_hreg(uint32_t from, uint32_t count)
+    {
+        return HIL::get_tfp(TFP_ADDR, from, &m_hdmi.bt[from], count);
+    }
+    static inline bool set_hreg(uint32_t from, uint32_t count)
+    {
+        return HIL::set_tfp(TFP_ADDR, from, &m_hdmi.bt[from], count);
+    }
 };

@@ -1,27 +1,14 @@
 #include "drv_video.h"
-#include "drv_spi.h"
-#include "drv_gpio.h"
+#include "hil.h"
 #include "drv_rcc.h"
 #include <cstring>
 #include "xprintf.h"
 #ifdef DEBUG
 #include "shell.h"
 #endif
-#include "drv_i2c.h"
-
-#define VIDEO_CTRL_BASE_ADDR 0
-
-extern CGPIO gpioa;
-extern CSPI spi1;
-extern CI2C i2c2;
-
-#define BUF_SIZE 64
 
 video_ctrl_t    CVideo::m_vregs;
 hdmi_regs_r     CVideo::m_hdmi;
-
-static uint8_t tx_buf[BUF_SIZE];
-static uint8_t rx_buf[BUF_SIZE];
 
 void CVideo::init()
 {
@@ -78,53 +65,6 @@ void CVideo::dump_hdmi()
     }
 }
 
-void CVideo::get_vreg(uint32_t from_addr, uint32_t count)
-{
-    tx_buf[0] = (from_addr + VIDEO_CTRL_BASE_ADDR);
-    tx_buf[1] = count;
-
-    gpioa.pin_DOWN(EGPIOPins::PIN_3);
-    // disable I2C1 clock - see ERRATA for STM32F103 medium density devices (ES096)
-    spi1.transmit_receive(tx_buf, rx_buf, count + 2, 1000);
-    memcpy(&m_vregs.bt[from_addr], &rx_buf[2], count);
-    gpioa.pin_UP(EGPIOPins::PIN_3);
-}
-
-void CVideo::set_vreg(uint32_t from_addr, uint32_t count)
-{
-    tx_buf[0] = (1 << 7) | (from_addr + VIDEO_CTRL_BASE_ADDR);
-    tx_buf[1] = count;
-
-    gpioa.pin_DOWN(EGPIOPins::PIN_3);
-    // disable I2C1 clock - see ERRATA for STM32F103 medium density devices (ES096)
-    memcpy(&tx_buf[2], &m_vregs.bt[from_addr], count);
-    spi1.transmit_receive(tx_buf, rx_buf, count + 2, 1000);
-    gpioa.pin_UP(EGPIOPins::PIN_3);
-}
-
-bool CVideo::get_hreg(uint32_t from, uint32_t count)
-{
-    if (i2c2.master_transmit(TFP_ADDR, (uint8_t*)&from, 1, 1000, true))
-    {
-        if (i2c2.master_receive(TFP_ADDR, &m_hdmi.bt[from], count, 1000))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool CVideo::set_hreg(uint32_t from, uint32_t count)
-{
-    tx_buf[0] = from;
-    memcpy(&tx_buf[1], &m_hdmi.bt[from], count);
-    if (i2c2.master_transmit(TFP_ADDR, tx_buf, count + 1, 1000, false))
-    {
-        return true;
-    }
-    return false;
-}
-
 #ifdef DEBUG
 
 status_e cmd_video_disable(uint32_t argc, char * const argv[])
@@ -176,19 +116,4 @@ status_e cmd_hdmi_enable(uint32_t argc, char * const argv[])
 }
 
 SHELL_COMMAND(hdmi_enable, "", cmd_hdmi_enable);
-
-status_e cmd_hdmi_set(uint32_t argc, char * const argv[])
-{
-    (void)(argc);
-    uint32_t addr = Shell::get_num(argv[1]);
-    tx_buf[0] = addr;
-    tx_buf[1] = Shell::get_num(argv[2]);
-    if (i2c2.master_transmit(TFP_ADDR, tx_buf, 2, 1000, false))
-    {
-        return STATUS_OK;
-    }
-    return STATUS_FAIL;
-}
-
-SHELL_COMMAND(hdmi_set, "", cmd_hdmi_set);
 #endif
