@@ -2,8 +2,12 @@ OBJS :=
 INC :=
 
 OBJS += app.o
+# GUI
 OBJS += display.o
 OBJS += fonts.o
+OBJS += gui.o
+OBJS += scr_info.o
+
 OBJS += init.o
 OBJS += isr_stm32f103xb.o
 OBJS += utils.o

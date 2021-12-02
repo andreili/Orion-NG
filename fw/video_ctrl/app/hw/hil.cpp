@@ -123,6 +123,23 @@ bool HIL::set_tfp(uint32_t dev_addr, uint8_t offset, uint8_t* p_data, uint32_t c
     return false;
 }
 
+void HIL::display_command(uint32_t dev_addr, uint8_t* p_data, uint32_t size)
+{
+    if (!i2c2.master_transmit(dev_addr, p_data, size, 100, false))
+    {
+        ASSERT(false);
+    }
+}
+
+void HIL::display_update(uint32_t dev_addr, uint8_t* p_data, uint32_t size)
+{
+    if (!i2c2.is_busy())
+    {
+        //i2c2.master_transmit_DMA(dev_addr, p_data, size, false);
+        i2c2.master_transmit(dev_addr, p_data, size, 1000, false);
+    }
+}
+
 void HIL::init_core()
 {
     CFLASH::prefetch_enable();

@@ -14,6 +14,8 @@ public:
     static bool get_edid(uint32_t dev_addr, uint8_t offset, uint8_t* p_data, uint32_t count);
     static bool get_tfp(uint32_t dev_addr, uint8_t offset, uint8_t* p_data, uint32_t count);
     static bool set_tfp(uint32_t dev_addr, uint8_t offset, uint8_t* p_data, uint32_t count);
+    static void display_command(uint32_t dev_addr, uint8_t* p_data, uint32_t size);
+    static void display_update(uint32_t dev_addr, uint8_t* p_data, uint32_t size);
 private:
     static void init_core();
     static void preinit_periph();

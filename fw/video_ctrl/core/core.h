@@ -23,10 +23,18 @@
 #include "core_drv.h"
 #include "hw_depend.h"
 
-#include "xprintf.h"
-#define ASSERT(cond) \
-    if (!cond) \
-    { \
-        xprintf("[ASSERT] %s:%d\n", __FILE__, __LINE__); \
-        while(1); \
-    }
+#ifdef DEBUG
+    #include "xprintf.h"
+    #define ASSERT(cond) \
+        if (!cond) \
+        { \
+            xprintf("[ASSERT] %s:%d\n", __FILE__, __LINE__); \
+            while(1); \
+        }
+#else
+    #define ASSERT(cond) \
+        if (!cond) \
+        { \
+            while(1); \
+        }
+#endif

@@ -1,14 +1,12 @@
 #include "display.h"
 #include "utils.h"
-#include "drv_i2c.h"
 #include "fonts.h"
+#include "hil.h"
 #include <string.h>
 
 bool Display::m_inverted;
 uint8_t* Display::m_data;
 uint8_t* Display::m_data_all;
-
-extern CI2C i2c2;
 
 static uint8_t _cmd_buf[4];
 
@@ -16,10 +14,7 @@ static uint8_t _cmd_buf[4];
     { \
         _cmd_buf[0] = 0; \
         _cmd_buf[1] = cmd; \
-        if (!i2c2.master_transmit(SSD1306_I2C_ADDR, _cmd_buf, 2, 100, false)) \
-        { \
-            ASSERT(false); \
-        } \
+        HIL::display_command(SSD1306_I2C_ADDR, _cmd_buf, 2); \
     }
 
 void Display::init(uint8_t* p_data)
@@ -69,10 +64,7 @@ void Display::clear()
 void Display::update()
 {
     m_data_all[0] = 0x40;
-    if (!i2c2.is_busy())
-    {
-        i2c2.master_transmit_DMA(SSD1306_I2C_ADDR, (uint8_t*)m_data_all, (SSD1306_WIDTH * SSD1306_HEIGHT / 8) + 1, false);
-    }
+    HIL::display_update(SSD1306_I2C_ADDR, m_data_all, (SSD1306_WIDTH * SSD1306_HEIGHT / 8) + 1);
 }
 
 void Display::draw_char(uint32_t x, uint32_t y, char ch)

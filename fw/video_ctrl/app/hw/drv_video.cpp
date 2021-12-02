@@ -1,6 +1,5 @@
 #include "drv_video.h"
 #include "hil.h"
-#include "drv_rcc.h"
 #include <cstring>
 #include "xprintf.h"
 #ifdef DEBUG
