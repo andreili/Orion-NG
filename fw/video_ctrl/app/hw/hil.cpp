@@ -7,6 +7,7 @@
 #include "drv_afio.h"
 #include "drv_i2c.h"
 #include "drv_spi.h"
+#include "drv_dma.h"
 
 #include "uart_fifo.h"
 #include "utils.h"
@@ -24,6 +25,7 @@ static CGPIO gpiob;
 CI2C i2c1;
 CI2C i2c2;
 CSPI spi1;
+DMA dma_i2c2_tx, dma_i2c2_rx;
 //CUSBD usbd_HS;
 //CUSBDCDC usb_cdc;
 
@@ -162,6 +164,16 @@ void HIL::preinit_periph()
     gpioa.pin_UP(EGPIOPins::PIN_0);
 
     CAFIO::remap_swj_nojtag();
+
+    dma_i2c2_tx.init(DMA1_BASE, DMA::EChannel::I2C2_TX);
+    dma_i2c2_tx.init_channel(DMA::EDirection::MEMORY_TO_PERIPH, DMA::EPeriphInc::DISABLE,
+        DMA::EMemInc::ENABLE, DMA::EPeriphDataAlign::BYTE, DMA::EMemhDataAlign::BYTE,
+        DMA::EMode::NORMAL, DMA::EPriority::MEDIUM);
+
+    dma_i2c2_rx.init(DMA1_BASE, DMA::EChannel::I2C2_RX);
+    dma_i2c2_rx.init_channel(DMA::EDirection::PERIPH_TO_MEMORY, DMA::EPeriphInc::DISABLE,
+        DMA::EMemInc::ENABLE, DMA::EPeriphDataAlign::BYTE, DMA::EMemhDataAlign::BYTE,
+        DMA::EMode::NORMAL, DMA::EPriority::MEDIUM);
 }
 
 void HIL::init_periph()

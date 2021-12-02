@@ -15,10 +15,12 @@ class CI2C
 public:
     void init(I2C_TypeDef* base, uint32_t clock_speed, EI2CDuty duty);
     bool master_transmit(uint32_t dev_addr, uint8_t* p_data, uint32_t size, uint32_t timeout, bool is_restart);
+    bool master_transmit_DMA(uint32_t dev_addr, uint8_t* p_data, uint32_t size, bool is_restart);
     bool master_receive(uint32_t dev_addr, uint8_t* p_data, uint32_t size, uint32_t timeout);
     void reset() { SET_REG32(&m_base->CR1, I2C_CR1_SWRST); CLEAR_REG32(&m_base->CR1, I2C_CR1_SWRST); }
     void enable() { SET_REG32(&m_base->CR1, I2C_CR1_PE); }
     void disable() { CLEAR_REG32(&m_base->CR1, I2C_CR1_PE); }
+    bool is_busy() { return get_flag(EFlag::BUSY); }
 private:
     I2C_TypeDef*    m_base;
 

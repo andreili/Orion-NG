@@ -126,6 +126,20 @@ bool CI2C::master_transmit(uint32_t dev_addr, uint8_t* p_data, uint32_t size, ui
     return true;
 }
 
+bool CI2C::master_transmit_DMA(uint32_t dev_addr, uint8_t* p_data, uint32_t size, bool is_restart)
+{
+    if (!wait_flag_until_timeout(EFlag::BUSY, true, I2C_TIMEOUT_BUSY_FLAG))
+    {
+        return false;
+    }
+
+    if (!is_enabled())
+    {
+        enable();
+    }
+    disable_pos();
+}
+
 bool CI2C::master_receive(uint32_t dev_addr, uint8_t* p_data, uint32_t size, uint32_t timeout)
 {
     uint32_t time_end = Utils::get_tick() + timeout;

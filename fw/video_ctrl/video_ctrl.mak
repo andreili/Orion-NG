@@ -31,6 +31,7 @@ OBJS += drv_gpio.o
 OBJS += drv_afio.o
 OBJS += drv_i2c.o
 OBJS += drv_spi.o
+OBJS += drv_dma.o
 #OBJS += drv_usb.o
 
 OBJS += hil.o

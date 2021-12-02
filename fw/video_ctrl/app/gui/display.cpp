@@ -69,7 +69,10 @@ void Display::clear()
 void Display::update()
 {
     m_data_all[0] = 0x40;
-    i2c2.master_transmit(SSD1306_I2C_ADDR, (uint8_t*)m_data_all, (SSD1306_WIDTH * SSD1306_HEIGHT / 8) + 1, 1000, false);
+    if (!i2c2.is_busy())
+    {
+        i2c2.master_transmit_DMA(SSD1306_I2C_ADDR, (uint8_t*)m_data_all, (SSD1306_WIDTH * SSD1306_HEIGHT / 8) + 1, false);
+    }
 }
 
 void Display::draw_char(uint32_t x, uint32_t y, char ch)
