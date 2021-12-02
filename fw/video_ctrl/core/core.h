@@ -27,6 +27,6 @@
 #define ASSERT(cond) \
     if (!cond) \
     { \
-        xprintf("[ASSERT] %s:%s\n", __FILE__, __LINE__); \
+        xprintf("[ASSERT] %s:%d\n", __FILE__, __LINE__); \
         while(1); \
     }
